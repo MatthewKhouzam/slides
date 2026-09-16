@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EST Slide Deck</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" sizes="16x16 32x32">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+    <!-- Reveal.js core -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/black.css" id="revealTheme" />
+
+    <!-- Code highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css" />
+
+    <!-- EST Theme (default: dark)  - override with ?theme=light or ?theme=blueprint -->
+    <link rel="stylesheet" href="css/est-dark.css" id="estTheme" />
+
+    <script>
+        // Parse URL parameters before page renders
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+
+            // Theme switching: ?theme=dark|light|blueprint
+            var theme = params.get('theme') || 'dark';
+            var validThemes = ['dark', 'light', 'blueprint'];
+            if (validThemes.indexOf(theme) !== -1) {
+                document.getElementById('estTheme').setAttribute('href', 'css/est-' + theme + '.css');
+            }
+
+            // Set Reveal.js base theme based on EST theme
+            if (theme === 'light') {
+                document.getElementById('revealTheme').setAttribute('href',
+                    'https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css');
+            }
+
+            // Title override: ?title=My+Presentation
+            var title = params.get('title');
+            if (title) {
+                document.title = title + '  - EST';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="logo">
+        <img src="assets/ERI_vertical_RGB.svg" alt="Ericsson Logo">
+    </div>
+
+    <div class="reveal">
+        <div class="slides" id="slides-container">
+            <!-- Content loaded dynamically based on ?deck= parameter -->
+        </div>
+    </div>
+
+    <!-- Reveal.js + plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/markdown/markdown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/highlight.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/math/math.js"></script>
+
+    <!-- Chart.js - available for any slide deck that needs charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+    <script>
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var deck = params.get('deck') || 'slides.html';
+            var container = document.getElementById('slides-container');
+
+            // Determine if we're loading Markdown or HTML
+            var isMarkdown = deck.endsWith('.md');
+
+            if (isMarkdown) {
+                // For Markdown files, use the Reveal.js markdown plugin
+                var section = document.createElement('section');
+                section.setAttribute('data-markdown', deck);
+                section.setAttribute('data-separator', '^---$');
+                section.setAttribute('data-separator-vertical', '^--$');
+                section.setAttribute('data-separator-notes', '^Note:');
+                container.appendChild(section);
+                initReveal();
+            } else {
+                // For HTML files, fetch and inject the content
+                fetch(deck)
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('Could not load ' + deck + ' (' + response.status + ')');
+                        }
+                        return response.text();
+                    })
+                    .then(function(html) {
+                        container.innerHTML = html;
+                        initReveal();
+                    })
+                    .catch(function(err) {
+                        container.innerHTML = '<section><h1>Error</h1><p>' + err.message + '</p>' +
+                            '<p class="muted">Use <code>?deck=slides.md</code> or <code>?deck=slides.html</code></p></section>';
+                        initReveal();
+                    });
+            }
+
+            function initReveal() {
+                Reveal.initialize({
+                    hash: true,
+                    slideNumber: true,
+                    controls: true,
+                    center: true,
+                    transition: 'slide',
+                    plugins: [
+                        RevealMarkdown,
+                        RevealHighlight,
+                        RevealNotes,
+                        RevealMath
+                    ]
+                }).then(function() {
+                    // Execute inline scripts from loaded slide content
+                    var scripts = container.querySelectorAll('script');
+                    scripts.forEach(function(oldScript) {
+                        var newScript = document.createElement('script');
+                        if (oldScript.src) {
+                            newScript.src = oldScript.src;
+                            newScript.async = true;
+                        } else if (oldScript.textContent.trim()) {
+                            newScript.textContent = oldScript.textContent;
+                        }
+                        oldScript.remove();
+                        document.body.appendChild(newScript);
+                    });
+
+                    // Load Tenor embeds if any exist
+                    if (document.querySelector('.tenor-gif-embed')) {
+                        var tenorScript = document.createElement('script');
+                        tenorScript.src = 'https://tenor.com/embed.js';
+                        tenorScript.async = true;
+                        document.body.appendChild(tenorScript);
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

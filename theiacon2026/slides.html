@@ -1,0 +1,795 @@
+<!-- Local AI on Eclipse Theia - TheiaCon 2026 - Fun Edition -->
+<!-- View: index.html?deck=slides.html&theme=dark  (default deck) -->
+
+<!-- Title Slide -->
+<section class="center-slide" data-background-image="assets/Ericsson_KV_C3_Still_Digital_16-9_IMG_11_D_web.jpg" data-background-size="contain">
+    <h1>🤖 Your GPU, Your Rules</h1>
+    <p class="lead">Running Local AI Coding Assistants in Eclipse Theia</p>
+    <img src="assets/theia-logo.svg" alt="Eclipse Theia" style="height: 60px; margin: 0.6em auto 0.2em; display: block; filter: invert(1);">
+    <p class="tiny">TheiaCon 2026 | Ericsson Software Technology</p>
+    <aside class="notes">Open with energy. The joke: you don't need a datacenter, you need the GPU already collecting dust in your closet. Set the tone - fun but technically real. The Theia wordmark is the official logo from theia-ide.org.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>🧑‍💻 What Even Is AI-Assisted Coding?</h2>
+    <ul>
+        <li>⌨️ <strong>Autocomplete</strong>: finish the line/block as you type</li>
+        <li>💬 <strong>Chat</strong>: explain, document, "why is this null?"</li>
+        <li>🤖 <strong>Agentic</strong>: multi-step edits across files with tools</li>
+        <li>🔍 <strong>Review</strong>: spot bugs, smells, and missing tests</li>
+    </ul>
+    <p class="small muted">A spectrum from "smart tab key" to "junior dev with a shell." 🧠</p>
+    <aside class="notes">Frame the whole space before we optimize hardware. Everyone means something different by "AI coding." Autocomplete is low-risk and high-value; agentic is powerful but needs guardrails (callback to the sandbox slide later).</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>💡 Why AI-Assisted Coding At All?</h2>
+    <ul>
+        <li>✨ Code <strong>generation</strong> is genuinely good now</li>
+        <li>🧹 Kills the boilerplate you hate writing</li>
+        <li>🎯 Lets you focus on the <strong>actual algorithm</strong>, not the plumbing</li>
+        <li>🔧 It's a tool - a great one - like the debugger or the compiler</li>
+    </ul>
+    <div class="callout-green">
+        ✅ You still design and decide. The AI just types faster than you do.
+    </div>
+    <aside class="notes">Open on the upside so the audience is not defensive. Generation quality crossed a threshold - it removes drudgery (boilerplate, glue, tests) so your brain stays on the hard part: the algorithm and the design. Frame it as a tool alongside compilers, linters, debuggers. Not a replacement for judgment.</aside>
+</section>
+<section data-background-color="#2a1a1a">
+    <h2>⚖️ But... Code Is a Liability</h2>
+    <ul>
+        <li>📦 Code is not an asset - it's a <strong>liability</strong> you maintain</li>
+        <li>🔧 More code = more bugs, more patches, more surface area</li>
+        <li>😅 AI just <strong>automated liability creation</strong> - at scale</li>
+        <li>🧑‍⚖️ Review and debug are still a <strong>human</strong> problem</li>
+    </ul>
+    <div class="callout">
+        ⚠️ The best line of code is the one you didn't have to write - or maintain.
+    </div>
+    <aside class="notes">The counterweight to slide 1. Every line you ship is something someone must understand, patch, and secure for years. AI makes generation nearly free, which means it makes liability nearly free too - you can now create maintenance burden faster than ever. The bottleneck moves downstream: reviewing and debugging that code is still on humans. This sets up the "generation vs review" thesis and the whole local/agent story.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>✅❌ Generation vs Review</h2>
+    <div class="twocol">
+        <div>
+            <h3>💚 Where it shines</h3>
+            <ul class="small">
+                <li>Boilerplate + glue code</li>
+                <li>Tests, docs, regexes</li>
+                <li>Unfamiliar API lookups</li>
+                <li>First-draft <em>generation</em> ✨</li>
+            </ul>
+        </div>
+        <div>
+            <h3>⚠️ Where it bites</h3>
+            <ul class="small">
+                <li>Confident-but-wrong code 🎭</li>
+                <li>Novel algorithms / architecture</li>
+                <li>Security-critical logic</li>
+                <li>Being the <em>final reviewer</em> 🚫</li>
+            </ul>
+        </div>
+    </div>
+    <div class="callout">
+        ⚠️ AI is a great <strong>generator</strong> and a shaky <strong>reviewer</strong>. You stay the reviewer of record.
+    </div>
+    <aside class="notes">The key mental model of the talk: lean on AI for generation, keep a human as the reviewer of record. It will happily approve its own hallucinations. Generation multiplies output; review still needs a skeptical human, because the model has no accountability and no real-world stakes.</aside>
+</section>
+<section>
+    <section data-background-color="#0a1628">
+        <h2>🧠 How Do LLMs Actually Work?</h2>
+        <ul>
+            <li>Text → <strong>tokens</strong> → vectors 🔢</li>
+            <li>A giant pile of <strong>weights</strong> predicts the next token</li>
+            <li>Every token = <strong>billions of memory reads</strong> of those weights</li>
+            <li>Do it in a loop → sentences, code, essays 🔁</li>
+        </ul>
+        <div class="callout-blue">
+            ℹ️ Inference is memory-bandwidth bound: the bottleneck is reading weights, not math.
+        </div>
+        <aside class="notes">Demystify without dumbing down. The model predicts the statistically likely next token from patterns in its weights. The key hardware insight: each generated token streams the whole active weight set from memory, so memory BANDWIDTH (not raw FLOPS) is usually the limiter. This is why VRAM speed matters as much as size.</aside>
+    </section>
+
+    <section data-background-color="#0a1628">
+        <h3>🎬 Inference, Visualized</h3>
+        <img src="assets/llm-inference-animation.svg" alt="LLM inference animation" style="max-height: 560px; width: auto; border-radius: 8px;">
+        <aside class="notes">Let the animation play. Point out the memory reads streaming into the compute units - that is the bandwidth bottleneck in motion.</aside>
+    </section>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>📐 Wider, Then Deeper</h2>
+    <ul>
+        <li>📏 <strong>Wider</strong>: more parameters = smarter... up to a point</li>
+        <li>📉 Diminishing returns - doubling params doesn't double smarts</li>
+        <li>🧗 So models went <strong>deeper</strong>: reasoning, multi-step, "think first"</li>
+        <li>⏳ Deeper = more tokens per answer = more time <em>and</em> more RAM</li>
+    </ul>
+    <div class="callout">
+        ⚠️ Reasoning models trade latency and memory for better answers. Pick your poison.
+    </div>
+    <aside class="notes">The scaling story: first we scaled width (parameter count), which hit diminishing returns and huge memory costs. Then the industry pivoted to test-time compute - reasoning models that generate long chains of thought. That buys quality but spends tokens, time, and KV-cache memory. This directly motivates the hardware conversation coming up.</aside>
+</section>
+<section>
+    <section data-background-color="#1a0a2e">
+        <h2>🤖 How Do Agents Work?</h2>
+        <ul>
+            <li>LLM + a <strong>loop</strong> + <strong>tools</strong> = an agent 🔧</li>
+            <li>Think → call a tool (read file, run test, git) → observe → repeat 🔁</li>
+            <li>MCP servers are the tools; the model decides when to use them 🛠️</li>
+            <li>Stops when the task is "done" (or the token budget runs out 😅)</li>
+        </ul>
+        <p class="small muted">The model is the brain; the loop and tools are the hands. That's the whole trick.</p>
+        <aside class="notes">An agent is not magic - it is a while-loop around an LLM that can call tools and read the results back. This is why sandboxing (Enclave) matters: the loop can run shell commands. Callback forward to the security slide.</aside>
+    </section>
+
+    <section data-background-color="#1a0a2e">
+        <h3>🎬 The Agent Loop, Visualized</h3>
+        <object type="image/svg+xml" data="assets/agentic-ai-animation.svg" style="max-height: 560px; width: auto; border-radius: 8px;" aria-label="Agentic AI loop animation with live token counter"></object>
+        <aside class="notes">Let it loop once. Trace the think → act → observe cycle. The token counter in the corner ticks up live to show tokens accumulate every iteration - agents are the hungriest workload. (Embedded via &lt;object&gt; so the counter script actually runs.)</aside>
+    </section>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>🧮 The Catch: Complexity &amp; Memory</h2>
+    <ul>
+        <li>Every token attends to every other → cost grows fast 📈</li>
+        <li>The <strong>KV cache</strong> grows with context - and eats VRAM 🍽️</li>
+        <li>Long context = more memory + slower each step 🐌</li>
+        <li>Accuracy <strong>drops</strong> the deeper you go - more hallucinations 🤥</li>
+        <li>Weights + KV cache + overhead must ALL fit in memory 📦</li>
+    </ul>
+    <div class="callout">
+        ⚠️ Rule of thumb: model size sets the floor, context length sets the ceiling - and stuffing the ceiling makes it dumber.
+    </div>
+    <aside class="notes">Attention is roughly quadratic in sequence length, and the KV cache is linear per token but adds up fast. This is the real reason "it won't fit" - it is not just the weights, it is the weights PLUS the running context. Also critical: accuracy degrades as context grows - models "lost in the middle" forget details, drift, and hallucinate more the further into a long context you push them. So a bigger context window is not free lunch: it costs memory, speed, AND reliability. Keep prompts focused.</aside>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>🌍 Why Even Bother? (The Vibe)</h2>
+    <ul>
+        <li>Every keystroke you type ships to someone else's computer 📡</li>
+        <li>Your code is the crown jewels - and you are renting the vault 🔐</li>
+        <li>Token meters running 24/7 while you sleep 💸</li>
+        <li>Airplane mode = coding mode? Not anymore ✈️</li>
+    </ul>
+    <p class="small muted">This is a systemic problem: we outsourced our brains and forgot where we put them.</p>
+    <aside class="notes">Set up the systemic framing. It is not one tool, it is the whole industry defaulting to the cloud. Pause on the "renting the vault" line.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🔥 The "This Is Fine" Status Quo</h2>
+    <div class="twocol">
+        <div>
+            <ul>
+                <li>Vendor rate-limits you mid-refactor</li>
+                <li>Model gets "updated" and dumber overnight</li>
+                <li>Privacy review says no to the cloud 🙅</li>
+            </ul>
+        </div>
+        <div style="text-align: center;">
+            <div class="tenor-gif-embed" data-postid="24177057" data-share-method="host" data-aspect-ratio="1.77" data-width="280">
+                <a href="https://tenor.com/view/this-is-fine-gif-24177057">This Is Fine</a>
+            </div>
+        </div>
+    </div>
+    <aside class="notes">The "this is fine" dog is the whole industry accepting these tradeoffs. Land the "dumber overnight" line - everyone has felt it.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>⚖️ Local AI vs Cloud AI</h2>
+    <table>
+        <thead>
+            <tr><th>Dimension</th><th>☁️ Cloud</th><th>🏠 Local</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Raw smarts</td><td>🏆 Frontier</td><td>Good enough (often)</td></tr>
+            <tr><td>Privacy</td><td>❓ "Trust us"</td><td>✅ Your machine</td></tr>
+            <tr><td>Cost</td><td>💸 Per token</td><td>⚡ Electricity</td></tr>
+            <tr><td>Latency</td><td>🌐 Network</td><td>🚀 Local bus</td></tr>
+            <tr><td>Offline</td><td>❌ Nope</td><td>✅ Airplane-ready</td></tr>
+        </tbody>
+    </table>
+    <aside class="notes">Do not oversell local. Cloud still wins on raw smarts. Local wins on everything you can actually control.</aside>
+</section>
+<section class="center-slide" data-background-color="#2a1a1a">
+    <h2>☁️ The Cloud Contenders</h2>
+    <p class="lead">Know your options before you cut the cord ✂️</p>
+    <div class="tenor-gif-embed" data-postid="18002878" data-share-method="host" data-aspect-ratio="1.5" data-width="320">
+        <a href="https://tenor.com/view/mind-blown-gif-18002878">Mind Blown</a>
+    </div>
+    <aside class="notes">Transition slide. We are being fair to the cloud before pivoting to local.</aside>
+</section>
+<section>
+    <section data-background-color="#0a1628">
+        <h3><img src="assets/vendor-gemini.svg" alt="Gemini" style="height:0.9em;vertical-align:-0.1em;"> Google Gemini &amp; <img src="assets/vendor-claude.svg" alt="Claude" style="height:0.9em;vertical-align:-0.1em;filter:invert(1);"> Anthropic Claude</h3>
+        <div class="twocol">
+            <div>
+                <h4><img src="assets/vendor-gemini.svg" alt="" style="height:0.8em;vertical-align:-0.1em;"> Gemini</h4>
+                <ul class="small">
+                    <li>✅ Huge context windows 📚</li>
+                    <li>✅ Cheap-ish, fast</li>
+                    <li>❌ Coding not always #1</li>
+                </ul>
+            </div>
+            <div>
+                <h4><img src="assets/vendor-claude.svg" alt="" style="height:0.8em;vertical-align:-0.1em;filter:invert(1);"> Claude</h4>
+                <ul class="small">
+                    <li>✅ Best-in-class for code 🏆</li>
+                    <li>✅ Great at long refactors</li>
+                    <li>❌ Premium pricing 💸</li>
+                </ul>
+            </div>
+        </div>
+        <aside class="notes">Claude is the coder's darling. Gemini is the context monster. Keep it balanced.</aside>
+    </section>
+
+    <section data-background-color="#1a0a2e">
+        <h3><img src="assets/vendor-openai.svg" alt="OpenAI" style="height:0.9em;vertical-align:-0.1em;"> OpenAI GPT &amp; <img src="assets/vendor-deepseek.svg" alt="DeepSeek" style="height:0.9em;vertical-align:-0.1em;"> DeepSeek</h3>
+        <div class="twocol">
+            <div>
+                <h4><img src="assets/vendor-openai.svg" alt="" style="height:0.8em;vertical-align:-0.1em;"> GPT</h4>
+                <ul class="small">
+                    <li>✅ Well-rounded, ecosystem 🌐</li>
+                    <li>✅ Strong tooling/agents</li>
+                    <li>❌ Cost adds up at scale</li>
+                </ul>
+            </div>
+            <div>
+                <h4><img src="assets/vendor-deepseek.svg" alt="" style="height:0.8em;vertical-align:-0.1em;"> DeepSeek</h4>
+                <ul class="small">
+                    <li>✅ Shockingly cheap 🤑</li>
+                    <li>✅ Open weights you can self-host!</li>
+                    <li>❌ Data residency questions 🌏</li>
+                </ul>
+            </div>
+        </div>
+        <p class="tiny muted">DeepSeek is the bridge: a cloud model you can also run locally.</p>
+        <aside class="notes">DeepSeek is the pivot - open weights means it can move to local. Foreshadow the local section.</aside>
+    </section>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>√-1 Tokens</h2>
+    <ul>
+        <li>A "token" is ~4 characters... or ~0.75 words... it depends 🤷</li>
+        <li>Same prompt, different tokenizer, different bill</li>
+        <li>Prices swing 10x between vendors for similar quality 📉📈</li>
+        <li>Input vs output vs cached tokens: three different meters ⏱️</li>
+    </ul>
+    <div class="callout">
+        ⚠️ You are billed in a unit you cannot see, at a price that changes on a whim.
+    </div>
+    <aside class="notes">The core point: token pricing is an abstraction the vendor controls end to end. They define the unit AND the price. Same work can cost wildly different amounts. It is not a market price, it is a menu price.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>🧮 When Does Local Get Cheaper?</h2>
+    <ul>
+        <li>💡 It's a break-even: hardware + electricity vs monthly tokens</li>
+        <li>A used 16GB GPU (~a few hundred $) pays back in months of heavy use ⚡</li>
+        <li>Light user? Cloud is cheaper - don't buy a GPU to save $8/mo 😅</li>
+        <li>Team of heavy agentic users? Local wins <em>hard</em></li>
+    </ul>
+    <p class="small muted">Break-even ≈ GPU cost ÷ (your monthly cloud spend − electricity). The heavier you use AI, the faster local pays off.</p>
+    <aside class="notes">Give them a mental model, not a false precise number. Break-even = upfront hardware divided by monthly savings. Heavy/agentic workloads (which burn tokens fast) tip toward local quickly. Casual users should stay on cloud. Honesty builds trust.</aside>
+</section>
+<section data-background-color="#2a1a1a">
+    <h2>🔐 Security &amp; Privacy Concerns</h2>
+    <div class="twocol">
+        <div>
+            <ul class="small">
+                <li>☁️ Your code leaves the building 📤</li>
+                <li>Prompts may be <strong>baked into future model weights</strong> 🧠</li>
+                <li>...then leaked verbatim, with <strong>zero traceability</strong> 🕳️</li>
+                <li>Retention + subpoena + breach risk 😬</li>
+                <li>Compliance (GDPR, IP, export) 🚧</li>
+            </ul>
+        </div>
+        <div style="text-align: center;">
+            <div class="tenor-gif-embed" data-postid="20389828" data-share-method="host" data-aspect-ratio="1.78" data-width="260">
+                <a href="https://tenor.com/view/trust-me-gif-20389828">Trust Me</a>
+            </div>
+        </div>
+    </div>
+    <aside class="notes">The cloud security model is "trust us." For proprietary code, regulated industries, or IP-sensitive work that is a hard sell. Read the bullets with a skeptical tone. The "trust me bro" GIF lands.</aside>
+</section>
+<section class="center-slide" data-background-color="#1a2a1a">
+    <h2>🏠 Now... Let's Go Local</h2>
+    <p class="lead">Pick a model that fits your VRAM budget 📦</p>
+    <div class="tenor-gif-embed" data-postid="12173388497868032007" data-share-method="host" data-aspect-ratio="1.0" data-width="1200" data-height="500">
+        <a href="https://tenor.com/view/let's-go-lets-goo-it's-go-time-less-go-lesgo-gif-12173388497868032007">Let's Go</a>
+    </div>
+    <aside class="notes">Energy shift. This is the heart of the talk. VRAM is destiny.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>🧰 What You Actually Need</h2>
+    <ul>
+        <li>🖥️ A GPU (or a Mac, or a fancy new mini-PC)</li>
+        <li>⚡ GPUs are <strong>10x-100x faster</strong> than CPUs for this</li>
+        <li>🧠 A runtime: <code>Ollama</code>, <code>llama.cpp</code>, or <code>LM Studio</code></li>
+        <li>📦 A quantized model that fits your VRAM (this is the whole game)</li>
+    </ul>
+    <div class="callout">
+        ⚠️ Offloading layers to the CPU usually <strong>tanks</strong> tok/s - avoid it unless you really know what you're doing.
+    </div>
+    <aside class="notes">Keep it concrete. The ingredients. GPUs are 10x-100x faster than CPUs for inference because of memory bandwidth and parallelism, so fitting the whole model in VRAM matters enormously. The tempting escape hatch - "just offload some layers to CPU/RAM when it doesn't fit" - almost always craters throughput, because every token then waits on the slow CPU-side layers. Better to pick a smaller model or a bigger card than to split. Only offload if you understand the bandwidth tradeoff. Fitting VRAM is the constraint everything revolves around.</aside>
+</section>
+<section data-background-color="#2a1a1a">
+    <h2>💥 Oh, And the Global RAM Crisis</h2>
+    <div class="twocol">
+        <div>
+            <ul class="small">
+                <li>AI demand vacuumed up HBM + DRAM supply 🌀</li>
+                <li>Memory prices spiked, lead times ballooned ⏳</li>
+                <li>That 24/32 GB card? Suddenly precious 💎</li>
+                <li>Unified-memory boxes are hot commodities 🔥</li>
+            </ul>
+        </div>
+        <div style="text-align: center;">
+            <div class="tenor-gif-embed" data-postid="5071053" data-share-method="host" data-aspect-ratio="1.77" data-width="260">
+                <a href="https://tenor.com/view/boss-gatsby-cheers-leonardo-di-caprio-great-gatsby-gif-5071053">Great Gatsby Cheers</a>
+            </div>
+        </div>
+    </div>
+    <p class="tiny muted">Memory is the new oil. Buy the VRAM while you can. ⛽</p>
+    <aside class="notes">The AI boom created a genuine memory squeeze - HBM for datacenter GPUs and DRAM broadly. This makes high-VRAM used cards (M40, MI50) and unified-memory machines even more attractive, and it is a real budgeting concern for anyone speccing local AI hardware right now. The Gatsby toast lands the "raise a glass to whoever still owns cheap VRAM" joke.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <section>
+    <h2>🎚️ Model Sizes by VRAM (1/2)</h2>
+   <table class="small tight">
+    <thead>
+        <tr>
+            <th>VRAM</th>
+            <th>Representative model</th>
+            <th>Quant</th>
+            <th>Good for</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>4 GB</strong></td>
+            <td><strong>Gemma 4 E4B / Qwen3 4B</strong></td>
+            <td>Q4_K_M</td>
+            <td>Basic coding, syntax, edits.</td>
+        </tr>
+        <tr>
+            <td><strong>8 GB</strong></td>
+            <td><strong>Gemma 4 E4B / Qwen3 8B</strong></td>
+            <td>Q4_K_M</td>
+            <td>General assistant, coding, reasoning.</td>
+        </tr>
+        <tr>
+            <td><strong>12 GB</strong></td>
+            <td><strong>Gemma 4 12B / Qwen3 14B</strong></td>
+            <td>Q4_K_M</td>
+            <td>Strong coding and reasoning.</td>
+        </tr>
+    </tbody>
+</table>
+    <p class="tiny muted">params (B) × ~0.6 = GB at Q4_K_M. Press ↓ for 16–32 GB. 🧮</p>
+    <aside class="notes">Small-to-mid tiers. The 0.6 rule of thumb is roughly right for Q4_K_M (~4.5 bits/weight). Names verified on ollama.com / Hugging Face. Press down for the big-VRAM tiers.</aside>
+    </section>
+
+    <section>
+    <h2>🎚️ Model Sizes by VRAM (2/2)</h2>
+   <table class="small tight">
+    <thead>
+        <tr>
+            <th>VRAM</th>
+            <th>Representative model</th>
+            <th>Quant</th>
+            <th>Good for</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>16 GB</strong></td>
+            <td><strong>Gemma 4 26B-A4B / Qwen3 30B-A3B (MoE)</strong></td>
+            <td>Q4_K_M</td>
+            <td>MoE fits with modest context; 12B leaves room for more.</td>
+        </tr>
+        <tr>
+            <td><strong>24 GB</strong></td>
+            <td><strong>Gemma 4 31B / Qwen3 32B</strong></td>
+            <td>Q4_K_M</td>
+            <td>Serious coding, reasoning, agentic - a 32B fits! 🎯</td>
+        </tr>
+        <tr>
+            <td><strong>32 GB</strong></td>
+            <td><strong>Qwen3 32B / Gemma 4 31B</strong></td>
+            <td>Q5_K_M–Q6_K</td>
+            <td>Same models, higher-quality quant + more context.</td>
+        </tr>
+    </tbody>
+</table>
+    <p class="tiny muted">MoE (26B-A4B, 30B-A3B) activate ~3-4B params/token. Qwen3 &amp; Gemma 3 are still great - just current picks. 🧮</p>
+    <aside class="notes">Big-VRAM tiers. The MoE models activate only ~3-4B params per token, so they run fast and their Q4 footprint fits 16 GB. Higher VRAM mostly buys better quant (Q5/Q6) and longer context, not always a bigger model. Caveat out loud: previous generations (Gemma 3, earlier Qwen) are NOT bad - perfectly usable; the table just lists current picks to keep it simple. Context eats VRAM too.</aside>
+    </section>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>🧬 The Open-Weights Families</h2>
+    <table>
+        <thead>
+            <tr><th>Family</th><th>Who</th><th>Why you'd pick it</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Qwen3</strong> (4B–32B, MoE)</td><td>Alibaba Cloud</td><td>Strong coder variants, sizes for every VRAM, permissive licenses 🏆</td></tr>
+            <tr><td><strong>Gemma 4</strong> (E4B–31B)</td><td>Google DeepMind</td><td>Open weights, efficient small models, great E4B for autocomplete ⚡</td></tr>
+            <tr><td><strong>Muse</strong></td><td>Meta</td><td>Generative world/creative model - beyond text 🎨</td></tr>
+        </tbody>
+    </table>
+    <p class="tiny muted">Qwen3 &amp; Gemma 4 cover the coding workhorses; Meta's Muse points at the generative future. 🔮</p>
+    <aside class="notes">Qwen3 (Alibaba) is the open-weights coding workhorse - permissive licenses and sizes from 4B to 32B (plus the 30B-A3B MoE) make it the community default for fine-tunes. Gemma 4 (Google DeepMind) is open-weights with excellent small models; the E4B is a superb fast autocomplete model and the 26B-A4B is a handy MoE. All sizes verified on ollama.com / Hugging Face. Meta's Muse is a different beast - a generative model aimed at creative/world generation rather than code, which foreshadows the ComfyUI/local-imagery future-work slide. Keep the framing honest: Qwen3 and Gemma 4 are what you actually code with today.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>📦 MLX vs GGUF</h2>
+    <div class="twocol">
+        <div>
+            <h3>🍎 MLX</h3>
+            <ul class="small">
+                <li>Apple Silicon native</li>
+                <li>Uses unified memory well</li>
+                <li>Fast on M-series Macs</li>
+                <li>Mac-only</li>
+            </ul>
+        </div>
+        <div>
+            <h3>🌍 GGUF</h3>
+            <ul class="small">
+                <li>llama.cpp / Ollama format</li>
+                <li>Runs everywhere (CUDA/ROCm/CPU)</li>
+                <li>Huge quant selection</li>
+                <li>The portable default</li>
+            </ul>
+        </div>
+    </div>
+    <p class="tiny muted">On a Mac? Try MLX for speed. Anywhere else (or mixed rigs)? GGUF. 🎯</p>
+    <aside class="notes">Two ways to package quantized weights. MLX is Apple's framework - it exploits unified memory and is the fastest path on M-series Macs, but it is Mac-only. GGUF is the llama.cpp/Ollama format: portable across NVIDIA, AMD, Intel, and CPU, with the widest range of quant levels. Rule of thumb: MLX if you live on a Mac and want max tok/s; GGUF for everything else and for portability across the bargain-bin cards we just covered.</aside>
+</section>
+<section class="center-slide" data-background-color="#2a1a1a">
+    <h2>🖥️ The Hardware Zoo</h2>
+    <p class="lead">From e-waste bargains to shiny new silicon</p>
+        <div class="tenor-gif-embed" data-postid="13250127" data-share-method="host" data-aspect-ratio="1.78571" data-width="100%" data-height="500"><a href="https://tenor.com/view/shut-up-and-take-my-money-gif-13250127">Shut Up And Take My Money GIF</a>from <a href="https://tenor.com/search/shut+up+and+take+my+money-gifs">Shut Up And Take My Money GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+    <aside class="notes">The fun part for the hardware nerds. We go from cheap-and-cursed to premium.</aside>
+</section>
+<section>
+    <section data-background-color="#0c1a2a">
+        <h2>💾 Server Pulls</h2>
+
+        <p class="tiny muted">Used prices via GPU Dojo (approx, they move). Ex-datacenter cards: huge VRAM, big cooling energy. 🔥 <span class="muted">(press ↓ for M40 &amp; MI50 detail)</span></p>
+        <div class="callout">
+            ⚠️ Server gear may need extra <strong>DRAM</strong>, PCIe <strong>ReBAR</strong>, or <strong>VFIO</strong> to behave. May not support fast attention, or other features assumed to exist, may need recompilations. Don't know those terms? Come see me after the talk. 🍻
+        </div>
+        <aside class="notes">This is genuinely USED SERVER gear, hence "bargain bin." The P100 is the cheapest way into 16GB HBM2. The M40 needs a 3D-printed shroud and a blower fan. The MI50/MI100 have HBM2 for peanuts but ROCm/datacenter drivers will test your patience. Real gotchas: these cards often want lots of system DRAM to load models, PCIe Resizable BAR (ReBAR) enabled in BIOS to map the full VRAM, and sometimes VFIO passthrough if you run them in a VM/container. The "come see me after" line is a friendly way to keep the talk moving without a 10-minute BIOS tangent. Press down for the two crowd-favorite cards in detail. Prices are approximate used-market figures from GPU Dojo.</aside>
+    </section>
+    <section > 
+    <h2>Example cards</h2>
+
+            <table class="small">
+            <thead>
+                <tr><th>Card</th><th>VRAM</th><th>~Used $</th><th>The Catch</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>🟦 AMD BC-250</td><td>16 GB</td><td>~$220</td><td>Repurposed failed PS5 APU - a hacker's toy 🎮</td></tr>
+                <tr><td>🟩 Tesla P100</td><td>16 GB</td><td>~$280</td><td>HBM2, Pascal, fanless 🧊</td></tr>
+                <tr><td>🟥 AMD MI50</td><td>16 GB</td><td>~$173</td><td>HBM2, ROCm may be difficult</td></tr>
+                <tr><td>🟩 Tesla M40</td><td>24 GB</td><td>~$146</td><td>Maxwell, passive - needs a cooling hack</td></tr>
+                <tr><td>🟩 Tesla P40</td><td>24 GB</td><td>~$299</td><td>Pascal, faster than M40, still fanless</td></tr>
+                <tr><td>🟥 AMD MI50</td><td>32 GB</td><td>~$600</td><td>HBM2, ROCm</td></tr>
+                <tr><td>🟩 Tesla V100</td><td>32 GB</td><td>~$800</td><td>Volta, faster than Pascal, no tensor cores, still fanless</td></tr>
+                <tr><td>🟥 AMD MI100</td><td>32 GB</td><td>~$880</td><td>CDNA, big bandwidth, datacenter drivers</td></tr>
+            </tbody>
+        </table></section>
+    <section data-background-color="#1a0a2e">
+        <h3>🟩 Tesla M40 24GB - The Cursed Champion</h3>
+        <ul>
+            <li>24 GB VRAM for the price of a nice dinner 🍽️</li>
+            <li>Passive cooling = you MUST bolt on a blower fan 🌬️</li>
+            <li>Maxwell era: slow-ish, no modern tensor cores</li>
+            <li>Runs 14B models happily via llama.cpp / Ollama ✅</li>
+        </ul>
+        <p class="small muted">Perfect for a homelab "AI box" that idles quietly in a closet.</p>
+        <aside class="notes">The M40 is a meme-tier card. It works! Just accept the cooling jank and modest speed. Great for batch/chat where latency is forgiving.</aside>
+    </section>
+
+    <section data-background-color="#2a1a1a">
+        <h3>🟥 MI50 - The HBM2 Sleeper</h3>
+        <ul>
+            <li>Fast HBM2 bandwidth for pennies 🚀</li>
+            <li>ROCm or Vulkan backend in llama.cpp</li>
+            <li>Fits bigger models or big context windows 📚</li>
+            <li>Driver setup is the boss fight 🐉</li>
+        </ul>
+        <aside class="notes">The MI50 is the sleeper pick if you can survive the ROCm install. HBM2 bandwidth opens up 14B at higher precision or long contexts. (16GB variant is the common cheap one; 32GB exists but is pricier.)</aside>
+    </section>
+
+    <section data-background-color="#1a2a1a">
+        <h3>🕹️ Special Mention: AMD BC-250</h3>
+        <ul>
+            <li>A <strong>PS5-derived APU</strong> that failed QC 🎮</li>
+            <li>Repurposed from crypto-mining blade servers ⛏️</li>
+            <li>16 GB, ~$220 - a hacker's bargain toy 🧰</li>
+            <li>Runs small/MoE models via Vulkan; quirky setup 🐧</li>
+        </ul>
+        <p class="small muted">Cursed silicon reborn: mining rig cast-off → local AI box. 💀➡️🤖</p>
+        <aside class="notes">The BC-250 is a fun oddity - it's the PS5's Oberon APU that didn't pass Sony's quality control, sold into crypto-mining blade chassis, and now flooding the used market as those miners get scrapped. 16GB, dirt cheap (~$220), Vulkan backend, community-hacked drivers. Not for the faint of heart, but a great story and a genuinely usable small/MoE inference box. The ultimate e-waste-to-AI redemption arc.</aside>
+    </section>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🎮 New Value Cards (Gaming / Consumer)</h2>
+    <table class="small">
+        <thead>
+            <tr><th>Card</th><th>VRAM</th><th>~$</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>🔵 Intel Arc A770</td><td>16 GB</td><td>~$300 used</td><td>IPEX-LLM/SYCL/Vulkan, improving fast 📈</td></tr>
+            <tr><td>🟥 RX 6800 XT</td><td>16 GB</td><td>~$399 used</td><td>ROCm/Vulkan, solid value 🎮</td></tr>
+            <tr><td>🟥 RX 6900 XT</td><td>16 GB</td><td>~$450 used</td><td>ROCm/Vulkan, more compute</td></tr>
+            <tr><td>🟥 RX 7900 XT</td><td>20 GB</td><td>~$650 used</td><td>RDNA3, most VRAM here</td></tr>
+            <tr><td>🟢 RTX 5070 Ti</td><td>16 GB</td><td>~$995 new</td><td>CUDA "just works", fast 🚀</td></tr>
+        </tbody>
+    </table>
+    <p class="tiny muted">Prices via GPU Dojo. These are current/consumer cards - not "bargain bin," just good value. 💡</p>
+    <aside class="notes">Distinct from the used-server tier: these are modern gaming/consumer cards you can buy new or lightly used. Arc is the cheapest 16GB newcomer, the RDNA cards are the AMD sweet spot, and the RTX 5070 Ti is the zero-drama CUDA option if you will pay for it. Do not call these bargain bin - that term is reserved for the ex-datacenter gear on the previous slide.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🟢 The Modern GeForce / CUDA Option</h2>
+    <table>
+        <thead>
+            <tr><th>Card</th><th>VRAM</th><th>~$</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>RTX 3090</td><td>24 GB</td><td>~$1,499 used</td><td>Best used $/tok, 24GB 🏆</td></tr>
+            <tr><td>RTX 4090</td><td>24 GB</td><td>~$2,073 new</td><td>Fast prefill, easy setup</td></tr>
+            <tr><td>RTX 5090</td><td>32 GB</td><td>~$6,500 new</td><td>Top tok/s, most VRAM 🚀</td></tr>
+        </tbody>
+    </table>
+    <p class="tiny muted">Prices via GPU Dojo. CUDA "just works" for every runtime - pay more, suffer less. The used 3090 is the sweet spot. 💡</p>
+    <aside class="notes">The modern GeForce is the "just works fast" option. CUDA ecosystem is unmatched for ease. The used RTX 3090 is the community darling - 24GB with great bandwidth at roughly half a 4090. The 5090 brings 32GB and top speed if budget is no object. Prices from GPU Dojo, approximate.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>🧩 The Unified Memory Revolution</h2>
+    <table>
+        <thead>
+            <tr><th>Platform</th><th>Trick</th><th>Why it rocks</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>🍎 MacBook (M-series)</td><td>Unified memory</td><td>64-128GB shared = huge models, silent, efficient</td></tr>
+            <tr><td>🔴 AMD Ryzen AI Max "Strix Halo"</td><td>Big iGPU + unified RAM</td><td>96GB+ addressable to the GPU 🤯</td></tr>
+            <tr><td>🟢 NVIDIA DGX Spark</td><td>Grace-Blackwell + 128GB</td><td>Desktop "AI supercomputer" 🚀</td></tr>
+        </tbody>
+    </table>
+    <p class="small muted">No VRAM ceiling drama: system memory IS the VRAM. 🧠</p>
+    <aside class="notes">This is the future. Unified memory kills the "won't fit in VRAM" problem. Mac started it, Strix Halo brought it to x86, DGX Spark is the halo product. These run 70B+ models locally.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>📊 Price vs VRAM (Used Market)</h2>
+    <canvas id="gpuChart" style="max-height: 460px;"></canvas>
+    <p class="tiny muted">Approx used prices via GPU Dojo. Lower + further right = more VRAM per dollar. 💰</p>
+    <aside class="notes">Visual summary of the hardware section. The bottom-right is the value zone: lots of VRAM, low price - that is where the used server gear (M40, P100, MI50) lives. The GeForce cards climb the price axis for speed and ease. Let the audience find their budget on the x-axis.</aside>
+</section>
+<section class="center-slide" data-background-image="assets/Ericsson_KV_C3_Still_Digital_16-9_IMG_04_D_web.jpg" data-background-size="contain">
+    <h2><img src="assets/theia-logo.svg" alt="Eclipse Theia" style="height: 0.9em; vertical-align: -0.1em; filter: invert(1);"> How To Do It In Eclipse Theia</h2>
+    <p class="lead">The IDE is already AI-native - just point it home 🏠</p>
+    <aside class="notes">Pivot to the main event. Theia has first-class AI support. We just redirect it to a local endpoint.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>Point Theia at Your Local Model</h2>
+    <ol class='small'>
+        <li>Run <code>ollama serve</code> (OpenAI-compatible on <code>:11434</code>) 🟢</li>
+        <li>Open Theia AI settings → add a custom model provider</li>
+        <li>Set base URL to <code>http://localhost:11434/v1</code></li>
+        <li>Pick your model: <code>qwen3:32b</code> (fits a 24 GB card!) 🎯</li>
+    </ol>
+    <div class="callout-green">
+        ✅ No API key. No egress. No monthly bill. Just localhost. 🎉
+    </div>
+    <aside class="notes">The whole trick: Theia's AI features speak the OpenAI API, and Ollama serves that API locally. Change the base URL, done.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>⚙️ The Config (It's Tiny)</h2>
+    <pre><code data-trim data-noescape class="language-json">
+{
+  "ai-features.modelSettings.providers": [
+    {
+      "name": "local-ollama",
+      "type": "openai-compatible",
+      "url": "http://localhost:11434/v1",
+      "models": ["qwen3:32b", "qwen3:8b"]
+    }
+  ],
+  "ai-features.codeCompletion.model": "qwen3:8b",
+  "ai-features.chat.model": "qwen3:32b"
+}
+    </code></pre>
+    <p class="tiny muted">Small model for completion (fast), big model for chat (smart). Best of both. 🧠⚡</p>
+    <aside class="notes">Note the split: a snappy Qwen3 8B for inline completion, and the bigger Qwen3 32B for chat/agent where you can wait a beat - and it still fits a 24 GB card at Q4.</aside>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>Local MCP Servers are Key</h2>
+    <ul class='small'>
+        <li>🗂️ Filesystem MCP: let the agent read/write your repo safely</li>
+        <li>🐙 Git MCP: diffs, blame, history without leaving the IDE</li>
+        <li>🗄️ Database MCP: query your local DB in-context</li>
+        <li>All running <strong>on your machine</strong> - nothing phones home 📵</li>
+    </ul>
+    <div class="callout-blue">
+        ℹ️ MCP = Model Context Protocol. Tools for your model, wired up locally. LSP for AI.
+    </div>
+    <div class="callout">
+        🔒 Reminder: Theia is <strong>security-first</strong> - the agent can't touch a tool until <strong>you grant permission</strong>. Nothing runs behind your back.
+    </div>
+    <aside class="notes">MCP is how the local model gets hands. Because the servers are local too, the whole loop stays private. This is the killer combo. Important: Theia does not auto-trust tools - it is security-first, so you explicitly grant each MCP server / tool permission before the agent can use it. No silent filesystem writes or shell calls. This pairs with the "Local Isn't Magic / sandbox the agent" slide - permissions are your first line of defense.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>📈 The Trace Server MCP <BR>(EST Flex)</h2>
+    <ul>
+        <li>Point the agent at a <strong>Trace Compass trace server</strong></li>
+        <li>"Why did CPU spike at t=4.2s?" → the model queries real trace data</li>
+        <li>Detect anomalies, correlate outputs, find the root cause 🕵️</li>
+        <li>Performance debugging, fully local, fully private</li>
+    </ul>
+    <p class="small muted">Your AI assistant can now read flame graphs so you don't have to squint. 🔥</p>
+    <aside class="notes">This is the EST home-turf flex. A trace-server MCP lets the local model do real performance analysis on LTTng/CTF traces. Great demo hook.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🛡️ Local Isn't Magic Either</h2>
+    <ul class ='small'>
+        <li>✅ No egress - your code never leaves the machine</li>
+        <li>⚠️ Verify model provenance (poisoned weights are real) 🧪</li>
+        <li>⚠️ MCP tools have real filesystem/DB access - scope them! 🔒</li>
+        <li>💥 An agent with <code>sudo</code> can <code>rm -rf /</code> your whole day</li>
+        <li>🧰 <strong>Eclipse Enclave</strong> sandboxes the agent + tools 🏰</li>
+    </ul>
+    <div class="callout-green">
+        ✅ Local removes the network risk. Enclave removes the "agent went rogue" risk.
+    </div>
+    <aside class="notes">Be honest: local fixes data-egress but introduces supply-chain (where did this GGUF come from?) and blast-radius concerns. An agent with sudo and shell access is a loaded gun - never run it unsandboxed. Eclipse Enclave gives you a sandbox so a rogue or hallucinating agent cannot touch the host. Least-privilege everything.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>📊 How Do We Even Measure "Good"?</h2>
+    <ul class='small'>
+        <li>🐛 <strong>SWE-bench</strong>: real GitHub issues, real repos, real fixes</li>
+        <li>Can the model produce a patch that passes the tests? ✅</li>
+        <li>Frontier cloud models: solving a large share of tasks 📈</li>
+        <li>Local models: catching up fast, especially the coder-tuned ones 🏃</li>
+    </ul>
+    <div class="callout">
+        ⚠️ Benchmarks are a compass, not a map. Your codebase is not SWE-bench.
+    </div>
+    <aside class="notes">SWE-bench is the standard everyone quotes. Caveat it hard - your repo behaves differently. Do not quote exact percentages you cannot defend; talk in ranges.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>⚡ Tok/s: Cloud vs Local</h2>
+    <table>
+        <thead>
+            <tr><th>Setup</th><th>Rough tok/s</th><th>Feel</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>☁️ Frontier cloud</td><td>50-150+</td><td>Instant 🚀</td></tr>
+            <tr><td>🟢 Modern GeForce, 7B</td><td>40-80</td><td>Snappy ⚡</td></tr>
+            <tr><td>🟩 Tesla M40, 14B</td><td>8-15</td><td>Sip your coffee ☕</td></tr>
+            <tr><td>🍎 Mac unified, 14B</td><td>15-30</td><td>Comfy 😌</td></tr>
+        </tbody>
+    </table>
+    <p class="tiny muted">Numbers are ballpark and depend on quant, context, and backend. 📏</p>
+    <aside class="notes">Be explicit these are ballpark ranges. The point is the FEEL, not the exact number. Reading speed is ~10 tok/s, so even the M40 is usable for chat.</aside>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>📇 Estimated Tok/s by Model (Q4)</h2>
+    <table class="small tight">
+        <thead>
+            <tr><th>Model</th><th>~VRAM</th><th>GeForce</th><th>Mac unified</th><th>M40 24GB</th><th>BC-250 16GB</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Gemma 4 E4B</td><td>~3 GB</td><td>70-110</td><td>35-55</td><td>18-28</td><td>20-32</td></tr>
+            <tr><td>Qwen3 8B</td><td>~6 GB</td><td>45-80</td><td>22-38</td><td>10-18</td><td>12-20</td></tr>
+            <tr><td>Gemma 4 12B</td><td>~9 GB</td><td>28-50</td><td>15-28</td><td>7-14</td><td>8-15</td></tr>
+            <tr><td>Qwen3 30B-A3B (MoE)</td><td>~16 GB</td><td>35-60</td><td>20-35</td><td>10-18</td><td>10-18</td></tr>
+            <tr><td>Qwen3 32B (dense)</td><td>~18 GB</td><td>18-35</td><td>10-20</td><td>5-10</td><td>-</td></tr>
+        </tbody>
+    </table>
+    <p class="tiny muted">Ballpark tok/s, Q4_K_M quant, short context. MoE is faster per token than dense at the same size. "-" = won't fit. 📏</p>
+    <aside class="notes">These are estimates for Q4_K_M quants at modest context. Every number is tokens/second on that hardware for that model. Gemma 4 E4B is the speed demon for autocomplete. Qwen3 8B is a great all-rounder. The Qwen3 30B-A3B is a Mixture-of-Experts (MoE) - only ~3B params active per token, so it runs faster than its size suggests AND fits a 16 GB card. The Qwen3 32B dense is smarter but heavier, wants 24 GB, and won't fit the 16 GB BC-250 (hence the dash). The BC-250 is a repurposed PS5 APU - decent for small/MoE models, limited by memory bandwidth on big dense ones. Even the ancient M40 keeps every model above reading speed. Do not defend exact digits - talk in ranges.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🎯 What's "Good Enough" For What?</h2>
+    <table class='small'>
+        <thead>
+            <tr><th>Task</th><th>Needs</th><th>Local verdict</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Inline autocomplete</td><td>Low latency, small model</td><td>✅ Local wins (privacy + speed)</td></tr>
+            <tr><td>Chat / explain code</td><td>7B-14B, some patience</td><td>✅ Totally fine</td></tr>
+            <tr><td>Refactor a module</td><td>14B+, tools/MCP</td><td>🟡 Good with a good model</td></tr>
+            <tr><td>Whole-system design</td><td>Frontier reasoning</td><td> Opportunities for success</td></tr>
+        </tbody>
+    </table>
+    <aside class="notes">The honest takeaway: local nails completion and chat today. Big architectural reasoning still favors frontier cloud. Use the right tool per task - hybrid is fine.</aside>
+</section>
+<section class="center-slide" data-background-color="#2a1a1a">
+    <h2>🎬 Demo Time</h2>
+    <p class="lead">Unplug the network cable. Let's write some code. 🔌❌</p>
+    <div class="tenor-gif-embed" data-postid="12729522" data-share-method="host" data-aspect-ratio="1.0" data-height="400">
+        <a href="https://tenor.com/view/fingers-crossed-gif-12729522">Fingers Crossed</a>
+    </div>
+    <aside class="notes">Live demo. Suggested flow: (1) show Ollama running, (2) autocomplete with 3B, (3) chat refactor with 14B, (4) trace-server MCP root-cause query, (5) dramatically pull the network cable to prove it's all local.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>🍿 Demo Checklist</h2>
+    <ol class='small'>
+        <li>✅ <code>ollama ps</code> - models loaded locally</li>
+        <li>✅ Inline completion firing in real time (Gemma 4 E4B) ⚡</li>
+        <li>✅ Chat: "explain and refactor this function" (Qwen3 30B-A3B MoE) 🧠</li>
+        <li>✅ MCP: agent queries the trace server for a CPU spike 📈</li>
+        <li>✅ Airplane mode ON - still fully working ✈️</li>
+    </ol>
+    <aside class="notes">If the live demo gods are unkind, have a recording ready. The airplane-mode reveal is the mic-drop moment.</aside>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>🔮 Future Work: Local Imagery</h2>
+    <ul>
+        <li>🎨 <strong>ComfyUI</strong>: node-based local image generation</li>
+        <li>Generate diagrams, icons, mockups - offline 🖼️</li>
+        <li>Wire ComfyUI in as another local MCP tool 🔗</li>
+        <li>"Draw me an architecture diagram" → pixels, no cloud ✨</li>
+    </ul>
+    <div class="callout-blue">
+        ℹ️ Same philosophy: your machine, your models, your data.
+    </div>
+    <aside class="notes">ComfyUI is the natural next step - local image gen as a tool. Imagine the coding agent generating UI mockups or diagrams entirely offline via an MCP bridge.</aside>
+</section>
+<section class="center-slide" data-background-image="assets/Ericsson_KV_C3_Still_Digital_16-9_IMG_12_D_web.jpg" data-background-size="contain">
+    <h2>Your IDE. Your Model. Your Machine.</h2>
+    <img src="assets/theia-logo.svg" alt="Eclipse Theia" style="height: 55px; margin: 0.3em auto 0.5em; display: block; filter: invert(1);">
+    <p class="lead">Local AI in Theia: private, cheap, and always online (even offline).</p>
+    <p>🔗 <a href="https://theia-ide.org/">theia-ide.org</a> | <a href="https://www.est.tech/">est.tech</a></p>
+    <p class="muted tiny">Now go dust off that Tesla M40. 🌬️🔥</p>
+    <aside class="notes">Thank the audience. Callback to the M40 for the laugh. Take questions.</aside>
+</section>
+
+<!-- Tenor embeds loaded by index.html after slide injection -->
+
+<!-- GPU price vs VRAM chart (Chart.js loaded by index.html) -->
+<script>
+(function() {
+    var ctx = document.getElementById('gpuChart');
+    if (!ctx) return;
+    // Approx used-market prices via GPU Dojo. {l:label, x:VRAM GB, y:price $}
+    var used = [
+        {l:'BC-250', x:16, y:220},
+        {l:'Tesla M40', x:24, y:146},
+        {l:'MI50', x:16, y:173},
+        {l:'Tesla P100', x:16, y:280},
+        {l:'Tesla P40', x:24, y:299},
+        {l:'Arc A770', x:16, y:300},
+        {l:'RX 6900 XT', x:16, y:450},
+        {l:'RX 7900 XT', x:20, y:650},
+        {l:'MI100', x:32, y:880},
+        {l:'RX 7900 XTX', x:24, y:899},
+        {l:'RTX 3090', x:24, y:1499},
+        {l:'A100 40GB', x:40, y:3700},
+        {l:'A6000', x:48, y:4370},
+        {l:'MI250X', x:128, y:6000}
+    ];
+    var neu = [
+        {l:'RTX 5070 Ti', x:16, y:995},
+        {l:'RTX 4090', x:24, y:2073},
+        {l:'RTX 5090', x:32, y:6500}
+    ];
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                { label: 'Used', data: used, backgroundColor: 'rgba(79,195,247,0.85)', pointRadius: 6 },
+                { label: 'New',  data: neu,  backgroundColor: 'rgba(255,171,64,0.9)', pointRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: {
+                legend: { labels: { color: '#e0e8f0' } },
+                title: { display: true, text: 'GPU Price vs VRAM (approx, GPU Dojo)', color: '#e0e8f0', font: { size: 14 } },
+                tooltip: { callbacks: { label: function(c){ return c.raw.l + ': ' + c.raw.x + 'GB / $' + c.raw.y; } } }
+            },
+            scales: {
+                x: { title: { display: true, text: 'VRAM (GB)', color: '#aaa' }, ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.08)' } },
+                y: { title: { display: true, text: 'Price (USD)', color: '#aaa' }, ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.08)' } }
+            }
+        }
+    });
+})();
+</script>

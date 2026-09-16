@@ -1,0 +1,238 @@
+/**
+ * EST Light Theme for Reveal.js
+ * Ericsson Software Technology  - Clean, high-contrast light mode
+ *
+ * Colors from Ericsson Design System (EDS):
+ *   Primary Blue: #0082F0
+ *   Background: #fafafa
+ *   Text: #1a1a1a
+ */
+
+/* === Font === */
+@font-face {
+    font-family: 'Hilda';
+    src: url('../assets/EricssonHilda-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* === Base === */
+:root {
+    --est-bg: #fafafa;
+    --est-bg-alt: #f0f4f8;
+    --est-text: #1a1a1a;
+    --est-text-muted: #666;
+    --est-blue: #0082F0;
+    --est-red: #d63031;
+    --est-green: #00a651;
+    --est-cyan: #0077b6;
+    --est-accent: var(--est-blue);
+    --est-callout-bg: rgba(0, 130, 240, 0.05);
+    --est-table-border: #ddd;
+    --est-table-header-bg: #f0f4f8;
+    --est-shadow: none;
+    --est-heading-shadow: none;
+}
+
+body {
+    background: var(--est-bg);
+}
+
+body, .reveal {
+    font-family: 'Hilda', 'Segoe UI', sans-serif;
+    color: var(--est-text);
+}
+
+.reveal .slides {
+    text-align: left;
+}
+
+.reveal .slides section {
+    text-shadow: none;
+}
+
+.reveal .slides section.center-slide {
+    text-align: center;
+}
+
+/* === Typography === */
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Hilda', 'Segoe UI', sans-serif;
+    text-transform: none;
+    text-shadow: none;
+    color: var(--est-text);
+}
+
+.reveal h1 {
+    font-size: 2.2em;
+    color: var(--est-blue);
+}
+.reveal h2 { font-size: 1.6em; }
+.reveal h3 { font-size: 1.3em; }
+
+.reveal a {
+    color: var(--est-blue);
+    text-decoration: none;
+}
+.reveal a:hover {
+    color: var(--est-cyan);
+    text-decoration: underline;
+}
+
+/* === Logo === */
+.logo {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    z-index: 10;
+}
+.logo img {
+    width: 100px;
+    height: auto;
+    /* Invert the white logo for light backgrounds */
+    filter: brightness(0) saturate(100%) invert(29%) sepia(93%) saturate(1700%) hue-rotate(196deg) brightness(97%) contrast(104%);
+}
+
+/* === Slide Footer === */
+.slide-footer {
+    position: absolute;
+    bottom: 12px;
+    left: 20px;
+    font-size: 0.5em;
+    color: var(--est-text-muted);
+    z-index: 1000;
+}
+
+/* === Utility Classes === */
+.lead {
+    font-size: 1.15em;
+    line-height: 1.35;
+}
+
+.tiny { font-size: 0.5em; }
+.small { font-size: 0.6em; }
+.muted { color: var(--est-text-muted); }
+
+.highlight { color: var(--est-red); }
+.highlight-blue { color: var(--est-blue); }
+.highlight-green { color: var(--est-green); }
+
+.spacious li {
+    margin-bottom: 0.5em;
+}
+
+/* === Layout === */
+.twocol {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.threecol {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.2rem;
+    align-items: start;
+}
+
+/* === Callouts === */
+.callout {
+    background: rgba(214, 48, 49, 0.05);
+    border-left: 4px solid var(--est-red);
+    padding: 0.8em 1.2em;
+    margin: 0.8em 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.callout-blue {
+    background: var(--est-callout-bg);
+    border-left: 4px solid var(--est-blue);
+    padding: 0.8em 1.2em;
+    margin: 0.8em 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.callout-green {
+    background: rgba(0, 166, 81, 0.05);
+    border-left: 4px solid var(--est-green);
+    padding: 0.8em 1.2em;
+    margin: 0.8em 0;
+    border-radius: 0 8px 8px 0;
+}
+
+/* === Tables === */
+.reveal table {
+    margin: 0.5em auto;
+    border-collapse: collapse;
+    font-size: 0.7em;
+}
+
+.reveal table th,
+.reveal table td {
+    border: 1px solid var(--est-table-border);
+    padding: 0.4em 0.6em;
+    text-align: left;
+}
+
+.reveal table th {
+    background: var(--est-table-header-bg);
+    font-weight: bold;
+}
+
+/* === Code === */
+.reveal pre {
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+
+.reveal pre code {
+    font-size: 0.55em !important;
+    line-height: 1.4 !important;
+    padding: 1em;
+}
+
+/* === Boxes === */
+.dbox {
+    background: var(--est-bg-alt);
+    border: 2px solid var(--est-blue);
+    border-radius: 8px;
+    padding: 0.4em 0.7em;
+    font-size: 0.65em;
+    text-align: center;
+}
+.dbox.red { border-color: var(--est-red); background: #fff5f5; }
+.dbox.green { border-color: var(--est-green); background: #f0fff4; }
+.dbox.blue { border-color: var(--est-blue); background: #f0f7ff; }
+
+/* === Background images === */
+section[data-background-image] h1,
+section[data-background-image] h2,
+section[data-background-image] h3,
+section[data-background-image] p,
+section[data-background-image] li {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 2px 2px 4px rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85);
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* === Progress bar === */
+.reveal .progress {
+    color: var(--est-blue);
+}
+
+/* === Slide number === */
+.reveal .slide-number {
+    color: var(--est-text-muted);
+    font-size: 0.5em;
+}
+
+/* === Print-friendly === */
+@media print {
+    body { background: white; }
+    .logo img { filter: none; }
+}

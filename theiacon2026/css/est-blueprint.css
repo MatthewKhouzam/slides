@@ -1,0 +1,309 @@
+/**
+ * EST Blueprint Theme for Reveal.js
+ * Ericsson Software Technology  - Technical/architecture mode
+ *
+ * Dark blue-grey with cyan accents, grid overlay, monospace feel.
+ * Best for: architecture talks, code walkthroughs, system design.
+ */
+
+/* === Font === */
+@font-face {
+    font-family: 'Hilda';
+    src: url('../assets/EricssonHilda-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* === Base === */
+:root {
+    --est-bg: #0d1b2a;
+    --est-bg-alt: #1b263b;
+    --est-text: #e0e8f0;
+    --est-text-muted: #7a8fa6;
+    --est-blue: #0082F0;
+    --est-red: #ff6b6b;
+    --est-green: #00e676;
+    --est-cyan: #00d4ff;
+    --est-accent: var(--est-cyan);
+    --est-callout-bg: rgba(0, 212, 255, 0.06);
+    --est-table-border: rgba(0, 212, 255, 0.25);
+    --est-table-header-bg: rgba(0, 212, 255, 0.1);
+    --est-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+    --est-heading-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
+    --est-grid-color: rgba(0, 212, 255, 0.06);
+}
+
+body {
+    background: linear-gradient(135deg, var(--est-bg) 0%, var(--est-bg-alt) 100%);
+}
+
+/* Grid overlay */
+.reveal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        linear-gradient(var(--est-grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--est-grid-color) 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+
+body, .reveal {
+    font-family: 'Hilda', 'Segoe UI', sans-serif;
+    color: var(--est-text);
+}
+
+.reveal .slides {
+    text-align: left;
+}
+
+.reveal .slides section {
+    text-shadow: var(--est-shadow);
+}
+
+.reveal .slides section.center-slide {
+    text-align: center;
+}
+
+/* === Typography === */
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Hilda', 'Segoe UI', sans-serif;
+    text-transform: none;
+    text-shadow: var(--est-heading-shadow);
+    color: var(--est-cyan);
+}
+
+.reveal h1 { font-size: 2.2em; }
+.reveal h2 { font-size: 1.6em; }
+.reveal h3 { font-size: 1.3em; color: var(--est-text); }
+
+.reveal a {
+    color: var(--est-cyan);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--est-cyan);
+}
+.reveal a:hover {
+    color: var(--est-green);
+    border-bottom-color: var(--est-green);
+}
+
+/* === Logo === */
+.logo {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    z-index: 10;
+}
+.logo img {
+    width: 100px;
+    height: auto;
+    opacity: 0.8;
+}
+
+/* === Slide Footer === */
+.slide-footer {
+    position: absolute;
+    bottom: 12px;
+    left: 20px;
+    font-size: 0.5em;
+    color: var(--est-text-muted);
+    z-index: 1000;
+    text-shadow: none;
+    font-family: 'Courier New', monospace;
+}
+
+/* === Utility Classes === */
+.lead {
+    font-size: 1.15em;
+    line-height: 1.35;
+}
+
+.tiny { font-size: 0.5em; }
+.small { font-size: 0.6em; }
+.muted { color: var(--est-text-muted); }
+
+.highlight { color: var(--est-red); }
+.highlight-blue { color: var(--est-cyan); }
+.highlight-green { color: var(--est-green); }
+
+.spacious li {
+    margin-bottom: 0.5em;
+}
+
+/* === Layout === */
+.twocol {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.threecol {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.2rem;
+    align-items: start;
+}
+
+/* === Callouts === */
+.callout {
+    background: rgba(255, 107, 107, 0.08);
+    border-left: 4px solid var(--est-red);
+    padding: 0.8em 1.2em;
+    margin: 0.8em 0;
+    border-radius: 0 4px 4px 0;
+    border: 1px solid rgba(255, 107, 107, 0.2);
+    border-left: 4px solid var(--est-red);
+}
+
+.callout-blue {
+    background: var(--est-callout-bg);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-left: 4px solid var(--est-cyan);
+    padding: 0.8em 1.2em;
+    margin: 0.8em 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.callout-green {
+    background: rgba(0, 230, 118, 0.06);
+    border: 1px solid rgba(0, 230, 118, 0.2);
+    border-left: 4px solid var(--est-green);
+    padding: 0.8em 1.2em;
+    margin: 0.8em 0;
+    border-radius: 0 4px 4px 0;
+}
+
+/* === Tables === */
+.reveal table {
+    margin: 0.5em auto;
+    border-collapse: collapse;
+    font-size: 0.7em;
+}
+
+.reveal table th,
+.reveal table td {
+    border: 1px solid var(--est-table-border);
+    padding: 0.4em 0.6em;
+    text-align: left;
+}
+
+.reveal table th {
+    background: var(--est-table-header-bg);
+    color: var(--est-cyan);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+/* === Code  - prominently styled === */
+.reveal pre {
+    width: 100%;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 4px;
+    background: rgba(13, 27, 42, 0.9);
+}
+
+.reveal pre code {
+    font-size: 0.55em !important;
+    line-height: 1.4 !important;
+    padding: 1em;
+    font-family: 'Courier New', 'JetBrains Mono', monospace;
+}
+
+.reveal code {
+    color: var(--est-cyan);
+    background: rgba(0, 212, 255, 0.08);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.reveal pre code {
+    color: var(--est-text);
+    background: transparent;
+}
+
+/* === Boxes === */
+.dbox {
+    background: var(--est-bg-alt);
+    border: 2px solid var(--est-cyan);
+    border-radius: 4px;
+    padding: 0.4em 0.7em;
+    font-size: 0.65em;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+}
+.dbox.red { border-color: var(--est-red); background: rgba(255, 107, 107, 0.08); }
+.dbox.green { border-color: var(--est-green); background: rgba(0, 230, 118, 0.08); }
+.dbox.blue { border-color: var(--est-cyan); background: rgba(0, 212, 255, 0.08); }
+
+/* === Background images === */
+section[data-background-image] h1,
+section[data-background-image] h2,
+section[data-background-image] h3,
+section[data-background-image] p,
+section[data-background-image] li {
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 0, 0, 0.9);
+}
+
+/* === Progress bar === */
+.reveal .progress {
+    color: var(--est-cyan);
+}
+
+/* === Slide number === */
+.reveal .slide-number {
+    color: var(--est-text-muted);
+    font-size: 0.5em;
+    font-family: 'Courier New', monospace;
+}
+
+/* === Special: Terminal/console style blocks === */
+.terminal {
+    background: #000;
+    border: 1px solid var(--est-cyan);
+    border-radius: 4px;
+    padding: 0.8em 1em;
+    font-family: 'Courier New', monospace;
+    font-size: 0.6em;
+    color: var(--est-green);
+    text-shadow: 0 0 4px rgba(0, 230, 118, 0.3);
+    overflow-x: auto;
+}
+
+.terminal::before {
+    content: '$ ';
+    color: var(--est-cyan);
+}
+
+/* === Architecture diagram nodes === */
+.arch-node {
+    background: var(--est-bg);
+    border: 2px solid var(--est-cyan);
+    border-radius: 4px;
+    padding: 0.5em 1em;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7em;
+    display: inline-block;
+    margin: 0.3em;
+}
+
+.arch-node.active {
+    border-color: var(--est-green);
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+.arch-arrow {
+    color: var(--est-cyan);
+    font-size: 1.5em;
+    vertical-align: middle;
+    margin: 0 0.3em;
+}
