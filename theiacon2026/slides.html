@@ -128,7 +128,7 @@
 </section>
 <section data-background-color="#0c1a2a">
     <h2>🧮 The Catch: Complexity &amp; Memory</h2>
-    <ul>
+    <ul class="small">
         <li>Every token attends to every other → cost grows fast 📈</li>
         <li>The <strong>KV cache</strong> grows with context - and eats VRAM 🍽️</li>
         <li>Long context = more memory + slower each step 🐌</li>
@@ -685,6 +685,27 @@
     <p class="tiny muted">Ballpark tok/s, Q4_K_M quant, short context. MoE is faster per token than dense at the same size. "-" = won't fit. 📏</p>
     <aside class="notes">These are estimates for Q4_K_M quants at modest context. Every number is tokens/second on that hardware for that model. Gemma 4 E4B is the speed demon for autocomplete. Qwen3 8B is a great all-rounder. The Qwen3 30B-A3B is a Mixture-of-Experts (MoE) - only ~3B params active per token, so it runs faster than its size suggests AND fits a 16 GB card. The Qwen3 32B dense is smarter but heavier, wants 24 GB, and won't fit the 16 GB BC-250 (hence the dash). The BC-250 is a repurposed PS5 APU - decent for small/MoE models, limited by memory bandwidth on big dense ones. Even the ancient M40 keeps every model above reading speed. Do not defend exact digits - talk in ranges.</aside>
 </section>
+<section data-background-color="#1a2a1a">
+    <h2>🔮 Multi-Token Prediction (MTP)</h2>
+    <ul class='small'>
+        <li>🐌 Normal decoding: <strong>one token at a time</strong> - bandwidth-bound, serial</li>
+        <li>⚡ MTP: the model predicts <strong>several tokens at once</strong> 🎯</li>
+        <li>🔁 Extra "prediction heads" draft ahead; the main model <strong>verifies</strong> them</li>
+        <li>📈 Real speedups (often <strong>~1.5-3x</strong> tok/s) with <em>no</em> loss in quality ✅</li>
+        <li>🤖 Tips <strong>agents</strong> from impossible → serviceable on non-dedicated hardware</li>
+        <li>🧠 Built into DeepSeek-V3, Qwen3, GLM &amp; more - Unsloth serves it locally</li>
+    </ul>
+    <div class="twocol">
+        <div class="callout-green">
+            ✅ Same weights, same VRAM, same answer - just <strong>more tokens per second</strong>. Free lunch (almost). 🍔
+        </div>
+        <div class="callout-blue">
+            ℹ️ Agents burn the most tokens - MTP made local agentic coding usable, and it keeps getting better. 🚀
+        </div>
+    </div>
+    <p class="tiny muted">Sources: <a href="https://unsloth.ai/docs/models/mtp">unsloth.ai/docs/models/mtp</a> · <a href="https://github.com/Xiaohao-Liu/Awesome-Multi-Token-Prediction">Awesome-Multi-Token-Prediction</a> 📚</p>
+    <aside class="notes">This is the "getting more out of your model" slide - a direct answer to the tok/s pain we just showed. Multi-Token Prediction (MTP) trains the model with extra lightweight prediction heads that guess the next few tokens in one forward pass, instead of the classic one-token-at-a-time autoregressive loop. Those drafted tokens are then verified cheaply by the main model (a form of self-speculative decoding), so you keep the exact same output quality - it is NOT lossy sampling. The payoff is throughput: commonly 1.5-3x more tokens per second depending on model, quant, and how predictable the text is (code and boilerplate accelerate especially well). Crucially for the local-hardware theme: it costs no extra VRAM for the weights you already loaded and it works on your existing card - so a cursed M40 or a BC-250 gets meaningfully faster for free. It is now baked into several open-weights families (DeepSeek-V3 pioneered it at scale, Qwen3, GLM, and others), and Unsloth exposes it for local serving. Awesome-Multi-Token-Prediction (Xiaohao-Liu on GitHub) is the curated reading list if someone wants the papers. Tie it back: bandwidth is the bottleneck (callback to the "how LLMs work" slide), and MTP is one of the best ways to beat it without buying more hardware. The big story for this talk: agentic coding is the hungriest workload (a loop that burns tokens every iteration), and on non-dedicated hardware - a gaming GPU, an old server pull, a laptop iGPU - agents used to be painfully slow to the point of being impractical. MTP's throughput boost pushed that from "impossible" to genuinely serviceable, and because it is an active research area (Awesome-MTP tracks a steady stream of papers), it will only keep getting better. So the honest optimistic note: local agents are usable today and improving fast.</aside>
+</section>
 <section data-background-color="#0a1628">
     <h2>🎯 What's "Good Enough" For What?</h2>
     <table class='small'>
@@ -695,7 +716,7 @@
             <tr><td>Inline autocomplete</td><td>Low latency, small model</td><td>✅ Local wins (privacy + speed)</td></tr>
             <tr><td>Chat / explain code</td><td>7B-14B, some patience</td><td>✅ Totally fine</td></tr>
             <tr><td>Refactor a module</td><td>14B+, tools/MCP</td><td>🟡 Good with a good model</td></tr>
-            <tr><td>Whole-system design</td><td>Frontier reasoning</td><td> Opportunities for success</td></tr>
+            <tr><td>Whole-system design</td><td>Frontier reasoning</td><td> Serviceable</td></tr>
         </tbody>
     </table>
     <aside class="notes">The honest takeaway: local nails completion and chat today. Big architectural reasoning still favors frontier cloud. Use the right tool per task - hybrid is fine.</aside>
