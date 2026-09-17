@@ -740,6 +740,171 @@
     </ol>
     <aside class="notes">If the live demo gods are unkind, have a recording ready. The airplane-mode reveal is the mic-drop moment.</aside>
 </section>
+<!-- Local styles scoped to the vibe-coding demo slides -->
+<style>
+    .vibe-demo .twocol {
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 1.6rem;
+        align-items: center;
+    }
+    .vibe-demo .prompt-card {
+        background: var(--est-callout-bg, rgba(255,255,255,0.07));
+        border-left: 4px solid var(--est-cyan, #4fc3f7);
+        border-radius: 0 10px 10px 0;
+        padding: 0.9em 1.1em;
+        text-align: left;
+    }
+    .vibe-demo .prompt-card .prompt-label {
+        font-size: 0.55em;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--est-text-muted, #9fb0c0);
+        margin: 0 0 0.4em;
+    }
+    .vibe-demo .prompt-card .prompt-text {
+        font-family: "consolas", "SFMono-Regular", Menlo, monospace;
+        font-size: 0.72em;
+        line-height: 1.4;
+        color: #e7f0f7;
+        margin: 0;
+    }
+    .vibe-demo .prompt-card.big .prompt-text { font-size: 1.6em; font-weight: 700; }
+    .vibe-demo .prompt-card.spec .prompt-text { font-size: 0.56em; line-height: 1.35; }
+    .vibe-demo .game-video {
+        max-height: 62vh;
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        background: #0a1628;
+    }
+    .vibe-demo .commit-tag {
+        font-family: monospace;
+        font-size: 0.5em;
+        color: var(--est-text-muted, #9fb0c0);
+    }
+    .vibe-qr img {
+        width: 300px; height: 300px;
+        background: #fff; padding: 14px; border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    .vibe-qr .repo-url {
+        font-family: monospace; font-size: 0.6em;
+        color: var(--est-cyan, #4fc3f7); word-break: break-all;
+    }
+</style>
+
+<!-- QR code to the vibe-life repo -->
+<section class="vibe-qr center-slide" data-background-color="#0a1628">
+    <h2>📱 Try It Yourself</h2>
+    <p class="lead">Scan to open the repo — every commit is a prompt.</p>
+    <img src="assets/vibe-life-qr.svg" alt="QR code for github.com/matthewkhouzam/vibe-life">
+    <p class="repo-url">github.com/matthewkhouzam/vibe-life</p>
+    <aside class="notes">Point the audience at the repo before the live demos. The QR encodes https://github.com/matthewkhouzam/vibe-life/ — the same repo whose commits we are about to watch evolve.</aside>
+</section>
+
+<!-- Vibe Coding Demo section relocated to appear before Future Work -->
+<!-- Section divider -->
+<section data-background-color="#0a1628">
+    <h2>🎮 Vibe Coding, Committed</h2>
+    <p class="lead">One repo. One game of life. Each commit is a <strong>prompt</strong>.</p>
+    <ul class="small">
+        <li>🌱 Plants grow → 🐰 herbivores eat plants → 🦊 carnivores eat herbivores</li>
+        <li>Every commit message <em>is</em> the prompt that produced that version</li>
+        <li>Watch the same simulation get "prettier" one prompt at a time</li>
+    </ul>
+    <div class="callout-blue">
+        ⏱️ All four versions were built <strong>locally</strong> with agentic coding — MTP + MLX on a Mac 4 Pro — taking <strong>26, 15, 24 and 41 minutes</strong> respectively.
+    </div>
+    <p class="tiny muted">Source: github.com/matthewkhouzam/vibe-life · videos recorded headlessly, 20s each</p>
+    <aside class="notes">This is the payoff demo. The point: with agentic coding you steer with intent ("make it pretty") and the tool does the plumbing. Show the progression: the first prompt is a full spec; the follow-ups are just vibes. Every version was produced by a LOCAL agent — Multi-Token Prediction (MTP) plus MLX on a Mac 4 Pro — with wall-clock agentic runtimes of 26 min (spec), 15 min ("pretty"), 24 min ("prettier"), and 41 min ("PRETTIER!"). Callback to the MTP slide: this is what made local agentic coding actually usable.</aside>
+</section>
+
+<!-- Commit 1: the full spec prompt -->
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>1️⃣ The Spec Prompt</h2>
+    <div class="twocol">
+        <div class="prompt-card spec">
+            <p class="prompt-label">Prompt · commit be766c0</p>
+            <p class="prompt-text">Make me a simulation game in pygame. It is a game of life with 3 types of entities: plants, herbivores and carnivores. A plant grows until eaten. Herbivores and carnivores start with high health; eating gains health, every turn loses health, at 0 HP they die. Carnivores gain HP by eating herbivores; herbivores gain HP by eating plants. Herbivores run away from carnivores; carnivores run toward herbivores to eat them.</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-01-be766c0.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">be766c0 · "Initial commit." · 🕒 26 min agentic (MTP + MLX, Mac 4 Pro)</p>
+    <aside class="notes">A detailed spec produces a working ecosystem sim: blocky, functional, no art direction. Everything after this is one-liners.</aside>
+</section>
+
+<!-- Commit 2: make it pretty -->
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>2️⃣ "Make it pretty"</h2>
+    <div class="twocol">
+        <div class="prompt-card big">
+            <p class="prompt-label">Prompt · commit f2292e4</p>
+            <p class="prompt-text">Make it pretty</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-02-f2292e4.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">f2292e4 · +364 lines: full color palette, water blobs + shallow "foam", coastal sand beaches, colored HP bars &amp; styled HUD · 🕒 15 min agentic (MTP + MLX, Mac 4 Pro)</p>
+    <aside class="notes">Diff be766c0→f2292e4 (+364/-100). "Pretty" meant: a real palette (water/shallow/grass/sand/plant/herb/carn shades) with color-lerping, procedural terrain — water blobs, shallow "foam" cells bordering deep water, and coastal sand that looks like beach — plus colored HP bars and a proper dark UI bar. Went from flat blocks to a readable world.</aside>
+</section>
+
+<!-- Commit 3: make it prettier -->
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>3️⃣ "Make it prettier"</h2>
+    <div class="twocol">
+        <div class="prompt-card big">
+            <p class="prompt-label">Prompt · commit 94a582a</p>
+            <p class="prompt-text">Make it prettier</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-03-94a582a.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">94a582a · +150 lines: desert biome (plants grow on grass only) + faded skull death sprites that fade out over time · 🕒 24 min agentic (MTP + MLX, Mac 4 Pro)</p>
+    <aside class="notes">Diff f2292e4→94a582a (+150/-7). "Prettier" added a desert biome — sandy blobs seeded on grass, where plants no longer grow — and animated death: cached skull sprites for herbivores/carnivores that fade out via decreasing alpha over several frames. More world variety plus a bit of storytelling in the visuals.</aside>
+</section>
+
+<!-- Commit 4: MAKE IT PRETTIER! -->
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>4️⃣ "MAKE IT PRETTIER!"</h2>
+    <div class="twocol">
+        <div class="prompt-card big">
+            <p class="prompt-label">Prompt · commit 03adbb8</p>
+            <p class="prompt-text">MAKE IT PRETTIER!</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-04-03adbb8.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">03adbb8 · rewrite (+181/-240): drop shadows, bounce animation, rounded bodies with outlines &amp; eyes, shimmering water · 🕒 41 min agentic (MTP + MLX, Mac 4 Pro)</p>
+    <aside class="notes">Diff 94a582a→03adbb8 (+181/-240) — a big refactor of the draw code. "PRETTIER!" brought character: entities cast ground drop-shadows and bounce (interpolated motion), bodies became rounded rects with outlines and little eyes, water shimmers via per-cell value noise, and HP bars got smoother. The most involved change of the four — 41 minutes — and visibly the lushest, most animated result.</aside>
+</section>
+
+<!-- Takeaway -->
+<section data-background-color="#1a2a1a">
+    <h2>🧭 What Just Happened?</h2>
+    <ul>
+        <li>🗒️ The <strong>first</strong> prompt was a real spec — design work</li>
+        <li>✨ Every prompt after was pure <strong>intent</strong>: "prettier"</li>
+        <li>🤖 The agent handled the plumbing; you stayed the <strong>director</strong></li>
+    </ul>
+    <div class="callout-green">
+        ✅ Steer with intent, review the diff, commit the prompt. That's the loop.
+    </div>
+    <aside class="notes">Reinforce the thesis of the whole talk: AI is a generator you direct. Note that the commit history literally documents the prompts — reproducible, reviewable, versioned intent.</aside>
+</section>
+
 <section data-background-color="#1a0a2e">
     <h2>🔮 Future Work: Local Imagery</h2>
     <ul>
