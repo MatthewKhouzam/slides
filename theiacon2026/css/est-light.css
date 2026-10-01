@@ -161,6 +161,14 @@ body, .reveal {
     border-radius: 0 8px 8px 0;
 }
 
+.callout-amber {
+    background: rgba(240, 165, 0, 0.07);
+    border-left: 4px solid #f0a500;
+    padding: 0.8em 1.2em;
+    margin: 0.8em 0;
+    border-radius: 0 8px 8px 0;
+}
+
 /* === Tables === */
 .reveal table {
     margin: 0.5em auto;

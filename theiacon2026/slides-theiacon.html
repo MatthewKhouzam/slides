@@ -1,0 +1,668 @@
+<!-- Local AI on Eclipse Theia - TheiaCon 2026 - TheiaCon Proper (23 min) -->
+<!-- View: index.html?deck=slides-theiacon.html&theme=dark  (23-min TheiaCon-proper cut) -->
+
+<!-- Title Slide -->
+<section class="center-slide" data-background-image="assets/Ericsson_KV_C3_Still_Digital_16-9_IMG_11_D_web.jpg" data-background-size="contain">
+    <h1>🤖 Your GPU, Your Rules</h1>
+    <p class="lead">Running Local AI Coding Assistants in Eclipse Theia</p>
+    <img src="assets/theia-logo.svg" alt="Eclipse Theia" style="height: 60px; margin: 0.6em auto 0.2em; display: block; filter: invert(1);">
+    <p class="tiny">TheiaCon 2026 | Ericsson Software Technology</p>
+    <aside class="notes">Open with energy. The joke: you don't need a datacenter, you need the GPU already collecting dust in your closet. Set the tone - fun but technically real. The Theia wordmark is the official logo from theia-ide.org.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>💡 Why AI-Assisted Coding At All?</h2>
+    <ul>
+        <li>✨ Code <strong>generation</strong> is genuinely good now</li>
+        <li>🧹 Kills the boilerplate you hate writing</li>
+        <li>🎯 Lets you focus on the <strong>actual algorithm</strong>, not the plumbing</li>
+        <li>🔧 It's a tool - a great one - like the debugger or the compiler</li>
+    </ul>
+    <div class="callout-green">
+        ✅ You still design and decide. The AI just types faster than you do.
+    </div>
+    <aside class="notes">Open on the upside so the audience is not defensive. Generation quality crossed a threshold - it removes drudgery (boilerplate, glue, tests) so your brain stays on the hard part: the algorithm and the design. Frame it as a tool alongside compilers, linters, debuggers. Not a replacement for judgment.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>✅❌ Generation vs Review</h2>
+    <div class="twocol">
+        <div>
+            <h3>💚 Where it shines</h3>
+            <ul class="small">
+                <li>Boilerplate + glue code</li>
+                <li>Tests, docs, regexes</li>
+                <li>Unfamiliar API lookups</li>
+                <li>First-draft <em>generation</em> ✨</li>
+            </ul>
+        </div>
+        <div>
+            <h3>⚠️ Where it bites</h3>
+            <ul class="small">
+                <li>Confident-but-wrong code 🎭</li>
+                <li>Novel algorithms / architecture</li>
+                <li>Security-critical logic</li>
+                <li>Being the <em>final reviewer</em> 🚫</li>
+            </ul>
+        </div>
+    </div>
+    <div class="callout">
+        ⚠️ AI is a great <strong>generator</strong> and a shaky <strong>reviewer</strong>. You stay the reviewer of record.
+    </div>
+    <aside class="notes">The key mental model of the talk: lean on AI for generation, keep a human as the reviewer of record. It will happily approve its own hallucinations. Generation multiplies output; review still needs a skeptical human, because the model has no accountability and no real-world stakes.</aside>
+</section>
+<section>
+    <section data-background-color="#1a0a2e">
+        <h2>🤖 How Do Agents Work?</h2>
+        <ul>
+            <li>LLM + a <strong>loop</strong> + <strong>tools</strong> = an agent 🔧</li>
+            <li>Think → call a tool (read file, run test, git) → observe → repeat 🔁</li>
+            <li>MCP servers are the tools; the model decides when to use them 🛠️</li>
+            <li>Stops when the task is "done" (or the token budget runs out 😅)</li>
+        </ul>
+        <p class="small muted">The model is the brain; the loop and tools are the hands. That's the whole trick.</p>
+        <aside class="notes">An agent is not magic - it is a while-loop around an LLM that can call tools and read the results back. This is why sandboxing (Enclave) matters: the loop can run shell commands. Callback forward to the security slide.</aside>
+    </section>
+
+    <section data-background-color="#1a0a2e">
+        <h3>🎬 The Agent Loop, Visualized</h3>
+        <object type="image/svg+xml" data="assets/agentic-ai-animation.svg" style="max-height: 560px; width: auto; border-radius: 8px;" aria-label="Agentic AI loop animation with live token counter"></object>
+        <aside class="notes">Let it loop once. Trace the think → act → observe cycle. The token counter in the corner ticks up live to show tokens accumulate every iteration - agents are the hungriest workload. (Embedded via &lt;object&gt; so the counter script actually runs.)</aside>
+    </section>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>🌍 Why Even Bother? (The Vibe)</h2>
+    <ul>
+        <li>Every keystroke you type ships to someone else's computer 📡</li>
+        <li>Your code is the crown jewels - and you are renting the vault 🔐</li>
+        <li>Token meters running 24/7 while you sleep 💸</li>
+        <li>Airplane mode = coding mode? Not anymore ✈️</li>
+    </ul>
+    <p class="small muted">This is a systemic problem: we outsourced our brains and forgot where we put them.</p>
+    <aside class="notes">Set up the systemic framing. It is not one tool, it is the whole industry defaulting to the cloud. Pause on the "renting the vault" line.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>⚖️ Local AI vs Cloud AI</h2>
+    <table>
+        <thead>
+            <tr><th>Dimension</th><th>☁️ Cloud</th><th>🏠 Local</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Raw smarts</td><td>🏆 Frontier</td><td>Good enough (often)</td></tr>
+            <tr><td>Privacy</td><td>❓ "Trust us"</td><td>✅ Your machine</td></tr>
+            <tr><td>Cost</td><td>💸 Per token</td><td>⚡ Electricity</td></tr>
+            <tr><td>Latency</td><td>🌐 Network</td><td>🚀 Local bus</td></tr>
+            <tr><td>Offline</td><td>❌ Nope</td><td>✅ Airplane-ready</td></tr>
+        </tbody>
+    </table>
+    <aside class="notes">Do not oversell local. Cloud still wins on raw smarts. Local wins on everything you can actually control.</aside>
+</section>
+<section data-background-color="#2a1a1a">
+    <h2>🔐 Security &amp; Privacy Concerns</h2>
+    <div class="twocol">
+        <div>
+            <ul class="small">
+                <li>☁️ Your code leaves the building 📤</li>
+                <li>Prompts may be <strong>baked into future model weights</strong> 🧠</li>
+                <li>...then leaked verbatim, with <strong>zero traceability</strong> 🕳️</li>
+                <li>Retention + subpoena + breach risk 😬</li>
+                <li>Compliance (GDPR, IP, export) 🚧</li>
+            </ul>
+        </div>
+        <div style="text-align: center;">
+            <div class="tenor-gif-embed" data-postid="20389828" data-share-method="host" data-aspect-ratio="1.78" data-width="260">
+                <a href="https://tenor.com/view/trust-me-gif-20389828">Trust Me</a>
+            </div>
+        </div>
+    </div>
+    <aside class="notes">The cloud security model is "trust us." For proprietary code, regulated industries, or IP-sensitive work that is a hard sell. Read the bullets with a skeptical tone. The "trust me bro" GIF lands.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>🧰 What You Actually Need</h2>
+    <ul>
+        <li>🖥️ A GPU (or a Mac, or a fancy new mini-PC)</li>
+        <li>⚡ GPUs are <strong>10x-100x faster</strong> than CPUs for this</li>
+        <li>🧠 A runtime: <code>Ollama</code>, <code>llama.cpp</code>, or <code>LM Studio</code></li>
+        <li>📦 A quantized model that fits your VRAM (this is the whole game)</li>
+    </ul>
+    <div class="callout">
+        ⚠️ Offloading layers to the CPU usually <strong>tanks</strong> tok/s - avoid it unless you really know what you're doing.
+    </div>
+    <aside class="notes">Keep it concrete. The ingredients. GPUs are 10x-100x faster than CPUs for inference because of memory bandwidth and parallelism, so fitting the whole model in VRAM matters enormously. The tempting escape hatch - "just offload some layers to CPU/RAM when it doesn't fit" - almost always craters throughput, because every token then waits on the slow CPU-side layers. Better to pick a smaller model or a bigger card than to split. Only offload if you understand the bandwidth tradeoff. Fitting VRAM is the constraint everything revolves around.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <section>
+    <h2>🎚️ Model Sizes by VRAM (1/2)</h2>
+   <table class="small tight">
+    <thead>
+        <tr>
+            <th>VRAM</th>
+            <th>Representative model</th>
+            <th>Quant</th>
+            <th>Good for</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>4 GB</strong></td>
+            <td><strong>Gemma 4 E4B / Qwen3 4B</strong></td>
+            <td>Q4_K_M</td>
+            <td>Basic coding, syntax, edits.</td>
+        </tr>
+        <tr>
+            <td><strong>8 GB</strong></td>
+            <td><strong>Gemma 4 E4B / Qwen3 8B</strong></td>
+            <td>Q4_K_M</td>
+            <td>General assistant, coding, reasoning.</td>
+        </tr>
+        <tr>
+            <td><strong>12 GB</strong></td>
+            <td><strong>Gemma 4 12B / Qwen3 14B</strong></td>
+            <td>Q4_K_M</td>
+            <td>Strong coding and reasoning.</td>
+        </tr>
+    </tbody>
+</table>
+    <p class="tiny muted">params (B) × ~0.6 = GB at Q4_K_M. Press ↓ for 16–32 GB. 🧮</p>
+    <aside class="notes">Small-to-mid tiers. The 0.6 rule of thumb is roughly right for Q4_K_M (~4.5 bits/weight). Names verified on ollama.com / Hugging Face. Press down for the big-VRAM tiers.</aside>
+    </section>
+
+    <section>
+    <h2>🎚️ Model Sizes by VRAM (2/2)</h2>
+   <table class="small tight">
+    <thead>
+        <tr>
+            <th>VRAM</th>
+            <th>Representative model</th>
+            <th>Quant</th>
+            <th>Good for</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>16 GB</strong></td>
+            <td><strong>Gemma 4 26B-A4B / Qwen3 30B-A3B (MoE)</strong></td>
+            <td>Q4_K_M</td>
+            <td>MoE fits with modest context; 12B leaves room for more.</td>
+        </tr>
+        <tr>
+            <td><strong>24 GB</strong></td>
+            <td><strong>Gemma 4 31B / Qwen3 32B</strong></td>
+            <td>Q4_K_M</td>
+            <td>Serious coding, reasoning, agentic - a 32B fits! 🎯</td>
+        </tr>
+        <tr>
+            <td><strong>32 GB</strong></td>
+            <td><strong>Qwen3 32B / Gemma 4 31B</strong></td>
+            <td>Q5_K_M–Q6_K</td>
+            <td>Same models, higher-quality quant + more context.</td>
+        </tr>
+    </tbody>
+</table>
+    <p class="tiny muted">MoE (26B-A4B, 30B-A3B) activate ~3-4B params/token. Qwen3 &amp; Gemma 3 are still great - just current picks. 🧮</p>
+    <aside class="notes">Big-VRAM tiers. The MoE models activate only ~3-4B params per token, so they run fast and their Q4 footprint fits 16 GB. Higher VRAM mostly buys better quant (Q5/Q6) and longer context, not always a bigger model. Caveat out loud: previous generations (Gemma 3, earlier Qwen) are NOT bad - perfectly usable; the table just lists current picks to keep it simple. Context eats VRAM too.</aside>
+    </section>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>🛒 The Hardware, One Table</h2>
+    <table class="small tight">
+        <thead>
+            <tr><th>Card / Platform</th><th>VRAM</th><th>~$</th><th>Tier</th><th>The catch</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>🟦 AMD BC-250</td><td>16 GB</td><td>~$220</td><td>Server pull</td><td>Failed PS5 APU, Vulkan, quirky 🎮</td></tr>
+            <tr><td>🟥 AMD MI50</td><td>16 GB</td><td>~$173</td><td>Server pull</td><td>HBM2 bargain, ROCm pain 🐉</td></tr>
+            <tr><td>🟩 Tesla P100</td><td>16 GB</td><td>~$280</td><td>Server pull</td><td>HBM2, Pascal, fanless 🧊</td></tr>
+            <tr><td>🟩 Tesla M40</td><td>24 GB</td><td>~$146</td><td>Server pull</td><td>Maxwell, needs a cooling hack 🌬️</td></tr>
+            <tr><td>🟩 Tesla V100</td><td>32 GB</td><td>~$800</td><td>Server pull</td><td>Volta, fast, fanless, no tensor cores</td></tr>
+            <tr><td>🔵 Intel Arc A770</td><td>16 GB</td><td>~$300</td><td>Consumer</td><td>SYCL/Vulkan, improving fast 📈</td></tr>
+            <tr><td>🟥 RX 7900 XT</td><td>20 GB</td><td>~$650</td><td>Consumer</td><td>RDNA3, most VRAM in class</td></tr>
+            <tr><td>🟢 RTX 3090</td><td>24 GB</td><td>~$1,499</td><td>GeForce</td><td>Used sweet spot, CUDA "just works" 🏆</td></tr>
+            <tr><td>🟢 RTX 5090</td><td>32 GB</td><td>~$6,500</td><td>GeForce</td><td>Top tok/s, most VRAM, $$$ 🚀</td></tr>
+            <tr><td>🍎 Mac / 🔴 Strix Halo / 🟢 DGX Spark</td><td>64–128 GB</td><td>varies</td><td>Unified</td><td>System RAM <em>is</em> VRAM — no ceiling 🧠</td></tr>
+        </tbody>
+    </table>
+    <p class="tiny muted">Approx used prices via GPU Dojo. Bottom = used-server bargains, top = pay-more-suffer-less, last row = unified memory kills the VRAM ceiling. VRAM is destiny. 💰</p>
+    <aside class="notes">One-slide summary of the whole hardware zoo (the fun deck spends ~8 slides here). Four tiers: (1) ex-datacenter server pulls — the bargain bin — huge VRAM for pennies but cooling/driver/ReBAR/VFIO jank: BC-250 (failed PS5 APU from mining blades), MI50 (HBM2, ROCm boss fight), P100 (cheapest 16GB HBM2), M40 (24GB meme card, needs a blower fan), V100 (32GB Volta). (2) Consumer gaming cards — Arc A770 cheapest new 16GB, RX 7900 XT the AMD VRAM sweet spot. (3) Modern GeForce — used RTX 3090 is the community darling (24GB, CUDA just works), RTX 5090 is top-end 32GB if money is no object. (4) Unified-memory boxes (Mac M-series, AMD Strix Halo, NVIDIA DGX Spark) where 64-128GB system RAM IS the VRAM and the "won't fit" problem disappears — these run 70B+ models locally. Prices approximate from GPU Dojo and move around. The whole point: pick the VRAM you need, then trade dollars for ease/speed.</aside>
+</section>
+<section class="center-slide" data-background-image="assets/Ericsson_KV_C3_Still_Digital_16-9_IMG_04_D_web.jpg" data-background-size="contain">
+    <h2><img src="assets/theia-logo.svg" alt="Eclipse Theia" style="height: 0.9em; vertical-align: -0.1em; filter: invert(1);"> How To Do It In Eclipse Theia</h2>
+    <p class="lead">The IDE is already AI-native - just point it home 🏠</p>
+    <aside class="notes">Pivot to the main event. Theia has first-class AI support. We just redirect it to a local endpoint.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>Point Theia at Your Local Model</h2>
+    <ol class='small'>
+        <li>Run <code>ollama serve</code> (OpenAI-compatible on <code>:11434</code>) 🟢</li>
+        <li>Open Theia AI settings → add a custom model provider</li>
+        <li>Set base URL to <code>http://localhost:11434/v1</code></li>
+        <li>Pick your model: <code>qwen3:32b</code> (fits a 24 GB card!) 🎯</li>
+    </ol>
+    <div class="callout-green">
+        ✅ No API key. No egress. No monthly bill. Just localhost. 🎉
+    </div>
+    <aside class="notes">The whole trick: Theia's AI features speak the OpenAI API, and Ollama serves that API locally. Change the base URL, done.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>⚙️ The Config (It's Tiny)</h2>
+    <pre><code data-trim data-noescape class="language-json">
+{
+  "ai-features.modelSettings.providers": [
+    {
+      "name": "local-ollama",
+      "type": "openai-compatible",
+      "url": "http://localhost:11434/v1",
+      "models": ["qwen3:32b", "qwen3:8b"]
+    }
+  ],
+  "ai-features.codeCompletion.model": "qwen3:8b",
+  "ai-features.chat.model": "qwen3:32b"
+}
+    </code></pre>
+    <p class="tiny muted">Small model for completion (fast), big model for chat (smart). Best of both. 🧠⚡</p>
+    <aside class="notes">Note the split: a snappy Qwen3 8B for inline completion, and the bigger Qwen3 32B for chat/agent where you can wait a beat - and it still fits a 24 GB card at Q4.</aside>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>Local MCP Servers are Key</h2>
+    <ul class='small'>
+        <li>🗂️ Filesystem MCP: let the agent read/write your repo safely</li>
+        <li>🐙 Git MCP: diffs, blame, history without leaving the IDE</li>
+        <li>🗄️ Database MCP: query your local DB in-context</li>
+        <li>All running <strong>on your machine</strong> - nothing phones home 📵</li>
+    </ul>
+    <div class="callout-blue">
+        ℹ️ MCP = Model Context Protocol. Tools for your model, wired up locally. LSP for AI.
+    </div>
+    <div class="callout">
+        🔒 Reminder: Theia is <strong>security-first</strong> - the agent can't touch a tool until <strong>you grant permission</strong>. Nothing runs behind your back.
+    </div>
+    <aside class="notes">MCP is how the local model gets hands. Because the servers are local too, the whole loop stays private. This is the killer combo. Important: Theia does not auto-trust tools - it is security-first, so you explicitly grant each MCP server / tool permission before the agent can use it. No silent filesystem writes or shell calls. This pairs with the "Local Isn't Magic / sandbox the agent" slide - permissions are your first line of defense.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>📈 The Trace Server MCP <BR>(EST Flex)</h2>
+    <ul>
+        <li>Point the agent at a <strong>Trace Compass trace server</strong></li>
+        <li>"Why did CPU spike at t=4.2s?" → the model queries real trace data</li>
+        <li>Detect anomalies, correlate outputs, find the root cause 🕵️</li>
+        <li>Performance debugging, fully local, fully private</li>
+    </ul>
+    <p class="small muted">Your AI assistant can now read flame graphs so you don't have to squint. 🔥</p>
+    <aside class="notes">This is the EST home-turf flex. A trace-server MCP lets the local model do real performance analysis on LTTng/CTF traces. Great demo hook.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>🔧 Hacking Theia Itself <span class="small muted">(because you can)</span></h2>
+    <ul class="small">
+        <li>🩺 <strong>Better "fetch failed" errors</strong> — so you know <em>why</em> the local endpoint didn't answer, instead of a bare stack trace</li>
+        <li>⏱️ <strong>Per-response usage stats</strong> — watch tokens tick up so you can tell when you're creeping toward a timeout</li>
+        <li>🔁 <strong>Tool-loop guard</strong> — catches the agent looping when the context window is too small to make progress</li>
+        <li>🟢 <strong>Local-model fixes</strong> — pass the full tool schema to Ollama so local models can actually call tools</li>
+    </ul>
+    <div class="callout-green">
+        ✅ Own the GPU <em>and</em> the IDE. Theia is open source — when it annoys you, you patch it. 🛠️
+    </div>
+    <p class="tiny muted">All on local feature branches of Eclipse Theia — admin of your own stack, top to bottom.</p>
+    <aside class="notes">The "I own the whole stack" flex. Because Theia is open source and these models run on my own GPUs, I don't file a ticket and wait — I open a branch and fix it. One real local branch per bullet: better_explain_fetch_failed surfaces WHY a local Ollama/endpoint call failed (connection refused, model not loaded, wrong port) instead of a bare "fetch failed." show_usage puts per-response token/usage stats in the chat — the practical use is spotting when a long response is approaching the request timeout so you can intervene. reset-loop adds a tool-call loop guard: on small local models a too-small context window makes the agent repeat the same tool call forever, and this stops that waste. local_ai + the Ollama schema fix make local models first-class — passing the full tool parameter schema through so they can actually use tools. Tie back to the thesis: you stay the director — and when the tool fights you, you also own the tool.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>🪟 Context Size Is the Real Impediment</h2>
+    <ul class="small">
+        <li>😵 Default local context is <strong>tiny</strong> — the agent runs out of room mid-task and starts flailing</li>
+        <li>🛠️ Fix it yourself: build a <strong>custom Ollama / LM Studio / vLLM model</strong> with a bigger <code>num_ctx</code></li>
+        <li>✅ It <em>can</em> go big: <strong>Qwen3 8B handles 256k</strong> today</li>
+        <li>⚠️ But not everything does: <strong>Muse ships 8k</strong>, <strong>Gemma</strong> is modest too — know your model's ceiling</li>
+        <li>📥 <strong>Input tokens matter</strong>: a fat system prompt eats the window before you've typed a thing</li>
+    </ul>
+    <div class="callout-green">
+        ✅ My fix: a custom agent called <strong><code>naked</code></strong> — <em>no</em> system prompt. Locally it just performs better. 🩲
+    </div>
+    <p class="tiny muted">You own your GPU and your VRAM. This isn't a datacenter that costs more than your life savings. Tradeoffs exist, but the end result is pretty good. 💪</p>
+    <aside class="notes">This is the honest "here's what actually bites you locally" slide, and it pairs with the earlier KV-cache slide. The number one practical impediment to local agentic coding is context size: Ollama and friends default to a small context window (often 2k to 8k), so the agent fills up fast and then thrashes, re-reading files, looping, losing the thread. The good news is you own the stack, so you fix it: author a custom model (an Ollama Modelfile with a larger num_ctx, or the equivalent in LM Studio / vLLM) to expose a bigger window. And models genuinely support it: as of today Qwen3 8B handles 256k context, which is enormous for a model that fits a cheap card. But be honest about the ceiling: not every model is generous. Meta's Muse ships with only 8k, and Gemma's windows are comparatively modest, so match the model to the job and don't assume 256k everywhere. The subtler lever is input tokens: every token you feed in (system prompt, tool schemas, file context) is context you spend before the model does any work, AND it costs latency and KV-cache memory. That's why I built a custom agent called "naked" with no system prompt at all: on local models, stripping the prompt consistently performs better, less to attend to, more room for the real task, faster first token. Input tokens matter as much as output tokens. Callback: this is the "stuffing the ceiling makes it dumber" point made actionable. End on the ownership note: tune the window as high as your VRAM allows and accept the tradeoff, because you own your GPU and your VRAM. You are not renting a datacenter that costs more than your life savings; the knobs are yours to turn, and even with the tradeoffs the end result is genuinely good. That's the whole empowerment thesis of the talk in one line.</aside>
+</section>
+<section data-background-color="#1a0a2e">
+    <h2>🩲 The <code>naked</code> Agent</h2>
+    <div class="twocol">
+        <div>
+            <ul class="small">
+                <li>🧵 A custom Theia agent with <strong>no system prompt</strong></li>
+                <li>📥 Every prompt token is spent <em>before</em> the model reasons</li>
+                <li>🎯 Small local models get <strong>distracted</strong> by a big prompt</li>
+                <li>⚡ Less to attend to = faster first token, more room for your code</li>
+                <li>📈 Only works <strong>now</strong>: modern LLMs are good enough to not need hand-holding</li>
+                <li>✅ Locally, it just <strong>performs better</strong></li>
+            </ul>
+        </div>
+        <div class="prompt-card spec" style="align-self:center;">
+            <p class="prompt-label">System prompt</p>
+            <p class="prompt-text" style="font-size:1.1em;">(empty)</p>
+        </div>
+    </div>
+    <div class="callout-green">
+        ✅ The leanest input wins. On a cloud frontier model a fat prompt is fine; on a 8B at home, every token counts.
+    </div>
+    <p class="tiny muted">Cloud models are trained to lean on elaborate system prompts. Local models often do better with none. 🧪</p>
+    <aside class="notes">Give the naked agent its own slide because it is a genuinely useful, counterintuitive local trick. Theia lets you define custom agents, including the prompt template. "naked" is one I made with an empty system prompt. The reasoning: input tokens are not free. A long system prompt (role, rules, tool etiquette, examples) is dozens to hundreds of tokens the model must read and attend to on every single turn before it even looks at your request. Big frontier cloud models were trained with those elaborate prompts and handle them well. Small local models (an 8B on your own card) are more easily distracted: the more boilerplate you stuff in front, the more they drift, hallucinate instructions, or burn context you needed for actual code. Stripping the prompt entirely consistently gives me better, faster, more on-task results locally, less to attend to, faster first token, and more of the precious context window left for the real work. It is the practical payoff of the "input tokens matter" point from the previous slide. Caveat honestly: this is empirical and model-dependent, not a universal law, so try it and measure. But it is a great example of the ownership thesis: because I own the agent definition and the model, I can experiment with something a cloud vendor would never let me toggle. Crucially, this is only viable now: a couple of model generations ago a bare prompt would have produced garbage, the models needed heavy instruction scaffolding to stay on task. Today's open-weights models are good enough to follow intent from the user turn alone, so the hand-holding system prompt has become optional, and often counterproductive, locally. It is a trick that the rising tide of model quality unlocked.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🛡️ Local Isn't Magic Either</h2>
+    <ul class ='small'>
+        <li>✅ No egress - your code never leaves the machine</li>
+        <li>⚠️ Verify model provenance (poisoned weights are real) 🧪</li>
+        <li>⚠️ MCP tools have real filesystem/DB access - scope them! 🔒</li>
+        <li>💥 An agent with <code>sudo</code> can <code>rm -rf /</code> your whole day</li>
+        <li>🧰 <strong>Eclipse Enclave</strong> sandboxes the agent + tools 🏰</li>
+    </ul>
+    <div class="callout-green">
+        ✅ Local removes the network risk. Enclave removes the "agent went rogue" risk.
+    </div>
+    <aside class="notes">Be honest: local fixes data-egress but introduces supply-chain (where did this GGUF come from?) and blast-radius concerns. An agent with sudo and shell access is a loaded gun - never run it unsandboxed. Eclipse Enclave gives you a sandbox so a rogue or hallucinating agent cannot touch the host. Least-privilege everything.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🎯 What's "Good Enough" For What?</h2>
+    <table class='small'>
+        <thead>
+            <tr><th>Task</th><th>Needs</th><th>Local verdict</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Inline autocomplete</td><td>Low latency, small model</td><td>✅ Local wins (privacy + speed)</td></tr>
+            <tr><td>Chat / explain code</td><td>7B-14B, some patience</td><td>✅ Totally fine</td></tr>
+            <tr><td>Refactor a module</td><td>14B+, tools/MCP</td><td>🟡 Good with a good model</td></tr>
+            <tr><td>Whole-system design</td><td>Frontier reasoning</td><td> Serviceable</td></tr>
+        </tbody>
+    </table>
+    <aside class="notes">The honest takeaway: local nails completion and chat today. Big architectural reasoning still favors frontier cloud. Use the right tool per task - hybrid is fine.</aside>
+</section>
+<section class="center-slide" data-background-color="#2a1a1a">
+    <h2>🎬 Demo Time</h2>
+    <p class="lead">Unplug the network cable. Let's write some code. 🔌❌</p>
+    <div class="tenor-gif-embed" data-postid="12729522" data-share-method="host" data-aspect-ratio="1.0" data-height="400">
+        <a href="https://tenor.com/view/fingers-crossed-gif-12729522">Fingers Crossed</a>
+    </div>
+    <aside class="notes">Live demo. Suggested flow: (1) show Ollama running, (2) autocomplete with 3B, (3) chat refactor with 14B, (4) trace-server MCP root-cause query, (5) dramatically pull the network cable to prove it's all local.</aside>
+</section>
+<section data-background-color="#0c1a2a">
+    <h2>🍿 Demo Checklist</h2>
+    <ol class='small'>
+        <li>✅ <code>ollama ps</code> - models loaded locally</li>
+        <li>✅ Inline completion firing in real time (Gemma 4 E4B) ⚡</li>
+        <li>✅ Chat: "explain and refactor this function" (Qwen3 30B-A3B MoE) 🧠</li>
+        <li>✅ MCP: agent queries the trace server for a CPU spike 📈</li>
+        <li>✅ Airplane mode ON - still fully working ✈️</li>
+    </ol>
+    <aside class="notes">If the live demo gods are unkind, have a recording ready. The airplane-mode reveal is the mic-drop moment.</aside>
+</section>
+<style>
+    .vibe-demo .twocol {
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 1.6rem;
+        align-items: center;
+    }
+    .vibe-demo .prompt-card {
+        background: var(--est-callout-bg, rgba(255,255,255,0.07));
+        border-left: 4px solid var(--est-cyan, #4fc3f7);
+        border-radius: 0 10px 10px 0;
+        padding: 0.9em 1.1em;
+        text-align: left;
+    }
+    .vibe-demo .prompt-card .prompt-label {
+        font-size: 0.55em;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--est-text-muted, #9fb0c0);
+        margin: 0 0 0.4em;
+    }
+    .vibe-demo .prompt-card .prompt-text {
+        font-family: "consolas", "SFMono-Regular", Menlo, monospace;
+        font-size: 0.72em;
+        line-height: 1.4;
+        color: #e7f0f7;
+        margin: 0;
+    }
+    .vibe-demo .prompt-card.big .prompt-text { font-size: 1.6em; font-weight: 700; }
+    /* Longer, full-sentence prompts (muse functional corrections) — small enough to read fully. */
+    .vibe-demo .prompt-card.med .prompt-text {
+        font-size: 0.95em;
+        font-weight: 600;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    .vibe-demo .prompt-card.spec .prompt-text { font-size: 0.56em; line-height: 1.35; }
+    .vibe-demo .game-video {
+        max-height: 62vh;
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        background: #0a1628;
+    }
+    .vibe-demo .commit-tag {
+        font-family: monospace;
+        font-size: 0.5em;
+        color: var(--est-text-muted, #9fb0c0);
+    }
+    .vibe-qr img {
+        width: 300px; height: 300px;
+        background: #fff; padding: 14px; border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    .vibe-qr .repo-url {
+        font-family: monospace; font-size: 0.6em;
+        color: var(--est-cyan, #4fc3f7); word-break: break-all;
+    }
+</style>
+<section class="vibe-qr center-slide" data-background-color="#0a1628">
+    <h2>📱 Try It Yourself</h2>
+    <p class="lead">Scan to open the repo — every commit is a prompt.</p>
+    <img src="assets/vibe-life-qr.svg" alt="QR code for github.com/matthewkhouzam/vibe-life">
+    <p class="repo-url">github.com/matthewkhouzam/vibe-life</p>
+    <aside class="notes">Point the audience at the repo before the live demos. The QR encodes https://github.com/matthewkhouzam/vibe-life/ — the same repo whose commits we are about to watch evolve.</aside>
+</section>
+<section data-background-color="#0a1628">
+    <h2>🎮 Vibe Coding, Committed</h2>
+    <p class="lead">One repo. One game of life. Each commit is a <strong>prompt</strong>.</p>
+    <ul class="small">
+        <li>🌱 Plants grow → 🐰 herbivores eat plants → 🦊 carnivores eat herbivores</li>
+        <li>Every commit message <em>is</em> the prompt that produced that version</li>
+        <li>Watch the same simulation get "prettier" one prompt at a time</li>
+    </ul>
+    <div class="callout-blue">
+        ⏱️ All four versions were built <strong>locally</strong> with agentic coding on a Mac — taking <strong>26, 15, 24 and 41 minutes</strong> respectively.
+    </div>
+    <p class="tiny muted">Source: github.com/matthewkhouzam/vibe-life · videos recorded headlessly, 20s each</p>
+    <aside class="notes">This is the payoff demo. The point: with agentic coding you steer with intent ("make it pretty") and the tool does the plumbing. For time we show just the first prompt (a full spec) and the final result; the middle two were more "prettier" one-liners. Every version was produced by a LOCAL agent running on a Mac, with wall-clock agentic runtimes of 26 min (spec), 15 min ("pretty"), 24 min ("prettier"), and 41 min ("PRETTIER!"). The headline: local agentic coding is genuinely usable today.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>1️⃣ The Spec Prompt</h2>
+    <div class="twocol">
+        <div class="prompt-card spec">
+            <p class="prompt-label">Prompt · commit be766c0</p>
+            <p class="prompt-text">Make me a simulation game in pygame. It is a game of life with 3 types of entities: plants, herbivores and carnivores. A plant grows until eaten. Herbivores and carnivores start with high health; eating gains health, every turn loses health, at 0 HP they die. Carnivores gain HP by eating herbivores; herbivores gain HP by eating plants. Herbivores run away from carnivores; carnivores run toward herbivores to eat them.</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-01-be766c0.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">be766c0 · "Initial commit." · 🕒 26 min agentic (local, Mac)</p>
+    <aside class="notes">A detailed spec produces a working ecosystem sim: blocky, functional, no art direction. Everything after this is one-liners.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>2️⃣ "Make it pretty"</h2>
+    <div class="twocol">
+        <div class="prompt-card big">
+            <p class="prompt-label">Prompt · commit f2292e4</p>
+            <p class="prompt-text">Make it pretty</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-02-f2292e4.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">f2292e4 · +364 lines: full color palette, water + coastal sand, colored HP bars &amp; styled HUD · 🕒 15 min agentic (local, Mac)</p>
+    <aside class="notes">"Pretty" meant a real palette with color-lerping, procedural terrain (water blobs, shallow foam, coastal sand) plus colored HP bars and a dark UI bar. From flat blocks to a readable world.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>3️⃣ "Make it prettier"</h2>
+    <div class="twocol">
+        <div class="prompt-card big">
+            <p class="prompt-label">Prompt · commit 94a582a</p>
+            <p class="prompt-text">Make it prettier</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-03-94a582a.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">94a582a · +150 lines: desert biome (plants grow on grass only) + fading skull death sprites · 🕒 24 min agentic (local, Mac)</p>
+    <aside class="notes">"Prettier" added a desert biome — sandy blobs on grass where plants don't grow — and animated death: skull sprites that fade out. More world variety plus visual storytelling.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>4️⃣ "MAKE IT PRETTIER!"</h2>
+    <div class="twocol">
+        <div class="prompt-card big">
+            <p class="prompt-label">Prompt · commit 03adbb8</p>
+            <p class="prompt-text">MAKE IT PRETTIER!</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/vibe-life-04-03adbb8.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">03adbb8 · rewrite (+181/-240): drop shadows, bounce animation, rounded bodies with outlines &amp; eyes, shimmering water · 🕒 41 min agentic (local, Mac)</p>
+    <aside class="notes">Diff 94a582a→03adbb8 (+181/-240) — a big refactor of the draw code. "PRETTIER!" brought character: entities cast ground drop-shadows and bounce (interpolated motion), bodies became rounded rects with outlines and little eyes, water shimmers via per-cell value noise, and HP bars got smoother. The most involved change of the four — 41 minutes — and visibly the lushest, most animated result.</aside>
+</section>
+<section data-background-color="#1a2a1a">
+    <h2>🧭 What Just Happened?</h2>
+    <ul>
+        <li>🗒️ The <strong>first</strong> prompt was a real spec — design work</li>
+        <li>✨ Every prompt after was pure <strong>intent</strong>: "prettier"</li>
+        <li>🤖 The agent handled the plumbing; you stayed the <strong>director</strong></li>
+    </ul>
+    <div class="callout-green">
+        ✅ Steer with intent, review the diff, commit the prompt. That's the loop.
+    </div>
+    <aside class="notes">Reinforce the thesis of the whole talk: AI is a generator you direct. Note that the commit history literally documents the prompts — reproducible, reviewable, versioned intent.</aside>
+</section>
+<!-- ===================== muse-glimmer:30b variant (short deck) ===================== -->
+<section data-background-color="#0a1628">
+    <h2>🔁 Same Game, Different Model: <code>muse-glimmer:30b</code></h2>
+    <p class="lead">Same <strong>initial spec</strong> — then <strong>functional</strong> corrections, not cosmetic ones.</p>
+    <ul class="small">
+        <li>🧠 <strong>muse-glimmer:30b</strong> with a <strong>128k context</strong> window</li>
+        <li>🛠️ Follow-ups fix <strong>behaviour</strong>: collisions, eating, hunger — not "make it prettier"</li>
+    </ul>
+    <p class="tiny muted">Source: github.com/matthewkhouzam/vibe-life · muse-life.py · 20s each</p>
+    <aside class="notes">Contrast with the earlier aesthetic prompts. This run uses muse-glimmer:30b with a 128k context window and functional corrections (collision detection, eat-adjacent, fix collisions/hunger). Same opening spec, different kind of intent.</aside>
+</section>
+<section data-background-color="#2a1405">
+    <h2>⚠️ …but Theia Struggled to Drive It</h2>
+    <ul>
+        <li>⏱️ <strong>Request timeouts</strong> on the long-context model</li>
+        <li>🔁 The agent fell into <strong>endless loops</strong></li>
+        <li>🧩 Needed manual nudging between commits</li>
+    </ul>
+    <div class="callout-amber">
+        ℹ️ A big context window and a capable 30B model don't automatically mean a smooth agentic run — loop and timeout handling matter just as much.
+    </div>
+    <aside class="notes">The honesty beat: Theia had a hard time orchestrating muse-glimmer:30b — request timeouts and endless loops, so each functional correction took manual intervention. Raw capability and context size aren't the whole story; the agentic harness is.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>1️⃣ The Spec Prompt</h2>
+    <div class="twocol">
+        <div class="prompt-card spec">
+            <p class="prompt-label">Prompt · commit 4babdb9</p>
+            <p class="prompt-text">Make me a simulation game in pygame. It is a game of life with 3 types of entities: plants, herbivores and carnivores. A plant grows until eaten. Herbivores and carnivores start with high health; eating gains health, every turn loses health, at 0 HP they die. Carnivores gain HP by eating herbivores; herbivores gain HP by eating plants. Herbivores run away from carnivores; carnivores run toward herbivores to eat them.</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/muse-life-01-4babdb9.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">4babdb9 · "initial muse life commit" · 🧠 muse-glimmer:30b · 128k ctx</p>
+    <aside class="notes">Same opening spec, produced by muse-glimmer:30b — the baseline the functional prompts will correct.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>2️⃣ "add collision detection"</h2>
+    <div class="twocol">
+        <div class="prompt-card med">
+            <p class="prompt-label">Prompt · commit d273f47</p>
+            <p class="prompt-text">add collision detection</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/muse-life-02-d273f47.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">d273f47 · functional fix: entities resolve overlap instead of stacking · 🧠 muse-glimmer:30b</p>
+    <aside class="notes">First functional correction — behaviour, not looks: a resolve_collision step so animals push apart instead of piling onto the same pixel.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>3️⃣ "make animals eat adjacent animals, not overlapping"</h2>
+    <div class="twocol">
+        <div class="prompt-card med">
+            <p class="prompt-label">Prompt · commit 0e75bcb</p>
+            <p class="prompt-text">make animals eat adjacent animals, not overlapping</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/muse-life-03-0e75bcb.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">0e75bcb · functional fix: eating triggers on adjacency (EAT_DIST), decoupled from overlap · 🧠 muse-glimmer:30b</p>
+    <aside class="notes">Once collisions keep bodies apart, "eat on overlap" never fires — so eating is redefined to trigger on adjacency. The kind of bug you only see once the previous fix lands.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>4️⃣ "fix collisions and hunger"</h2>
+    <div class="twocol">
+        <div class="prompt-card med">
+            <p class="prompt-label">Prompt · commit 3341002</p>
+            <p class="prompt-text">fix collisions and hunger</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/muse-life-04-3341002.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">3341002 · functional fix: tuned collisions + hunger/health balance for a stable ecosystem · 🧠 muse-glimmer:30b</p>
+    <aside class="notes">After three functional corrections (collision detection; eat-adjacent not overlapping; then balancing), the ecosystem is stable. Four functional prompts vs. four aesthetic ones: same spec, different intent.</aside>
+</section>
+<!-- ===================== gemma4:12b (128k) variant (short deck) ===================== -->
+<section data-background-color="#0a1628">
+    <h2>🧬 Third Model: <code>gemma4:12b</code> · 128k ctx</h2>
+    <p class="lead">A <strong>richer, one-shot spec</strong> — terrain, water, and self-replication.</p>
+    <ul class="small">
+        <li>🧠 <strong>gemma4:12b</strong> with a <strong>128k context</strong> window</li>
+        <li>🗺️ Random <strong>terrain</strong>, carnivores <strong>can't cross water</strong>, HP regen/decay</li>
+        <li>🧫 At <strong>HP == 100</strong> a lifeform <strong>splits into two</strong> at 50% HP</li>
+    </ul>
+    <p class="tiny muted">Source: github.com/matthewkhouzam/vibe-life · gemma-life.py · 20s</p>
+    <aside class="notes">Third local model: gemma4:12b with 128k context, driven by a single richer spec — grid terrain with water carnivores avoid, plant HP regen, animal HP decay, and self-replication at full HP. The commit message is the prompt verbatim.</aside>
+</section>
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>1️⃣ The One-Shot Spec</h2>
+    <div class="twocol">
+        <div class="prompt-card spec">
+            <p class="prompt-label">Prompt · commit b696a8d</p>
+            <p class="prompt-text">using pygame, make me a game of life game. It has 3 layers. carnivores eat herbivores, herbivores eat plants, plants grow. Put it on a random terrain. The carnivores cannot cross water. Have each life form have hp. Plant hp regens contantly, animals goes down. the animals go up when they have food. When animal hp == 100, they split into two of 50% hp. write it to gemma-life.py:</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/gemma-life-01-b696a8d.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">b696a8d · one-shot: grid terrain + water, HP regen/decay, split-at-100 · 🧠 gemma4:12b · 128k ctx</p>
+    <aside class="notes">gemma4:12b took the richer spec in a single shot: a grid world with random terrain and blue water (carnivores avoid it), plant HP regen, animal HP decay with gain-on-eat, and self-replication at full HP. A visibly different tile-grid look from the same family of rules.</aside>
+</section>
+<section class="center-slide" data-background-image="assets/Ericsson_KV_C3_Still_Digital_16-9_IMG_12_D_web.jpg" data-background-size="contain">
+    <h2>Your IDE. Your Model. Your Machine.</h2>
+    <img src="assets/theia-logo.svg" alt="Eclipse Theia" style="height: 55px; margin: 0.3em auto 0.5em; display: block; filter: invert(1);">
+    <p class="lead">Local AI in Theia: private, cheap, and always online (even offline).</p>
+    <p>🔗 <a href="https://theia-ide.org/">theia-ide.org</a> | <a href="https://www.est.tech/">est.tech</a></p>
+    <p class="muted tiny">Now go dust off that Tesla M40. 🌬️🔥</p>
+    <aside class="notes">Thank the audience. Callback to the M40 for the laugh. Take questions.</aside>
+</section>
