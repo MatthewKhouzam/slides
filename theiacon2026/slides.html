@@ -619,28 +619,28 @@
 <section data-background-color="#0c1a2a">
     <h2>🔧 Hacking Theia Itself <span class="small muted">(because you can)</span></h2>
     <ul class="small">
-        <li>🩺 <strong>Better "fetch failed" errors</strong> — so you know <em>why</em> the local endpoint didn't answer, instead of a bare stack trace</li>
-        <li>⏱️ <strong>Per-response usage stats</strong> — watch tokens tick up so you can tell when you're creeping toward a timeout</li>
-        <li>🔁 <strong>Tool-loop guard</strong> — catches the agent looping when the context window is too small to make progress</li>
-        <li>🟢 <strong>Local-model fixes</strong> — pass the full tool schema to Ollama so local models can actually call tools</li>
+        <li>🩺 <strong>Better "fetch failed" errors</strong>, so you know <em>why</em> the local endpoint didn't answer, instead of a bare stack trace</li>
+        <li>⏱️ <strong>Per-response usage stats</strong>, watch tokens tick up so you can tell when you're creeping toward a timeout</li>
+        <li>🔁 <strong>Tool-loop guard</strong>, catches the agent looping when the context window is too small to make progress</li>
+        <li>🟢 <strong>Local-model fixes</strong>, pass the full tool schema to Ollama so local models can actually call tools</li>
     </ul>
     <div class="callout-green">
-        ✅ Own the GPU <em>and</em> the IDE. Theia is open source — when it annoys you, you patch it. 🛠️
+        ✅ Own the GPU <em>and</em> the IDE. Theia is open source, when it annoys you, you patch it. 🛠️
     </div>
-    <p class="tiny muted">All on local feature branches of Eclipse Theia — admin of your own stack, top to bottom.</p>
-    <aside class="notes">The "I own the whole stack" flex. Because Theia is open source and these models run on my own GPUs, I don't file a ticket and wait — I open a branch and fix it. One real local branch per bullet: better_explain_fetch_failed surfaces WHY a local Ollama/endpoint call failed (connection refused, model not loaded, wrong port) instead of a bare "fetch failed." show_usage puts per-response token/usage stats in the chat — the practical use is spotting when a long response is approaching the request timeout so you can intervene. reset-loop adds a tool-call loop guard: on small local models a too-small context window makes the agent repeat the same tool call forever, and this stops that waste. local_ai + the Ollama schema fix make local models first-class — passing the full tool parameter schema through so they can actually use tools. Tie back to the thesis: you stay the director — and when the tool fights you, you also own the tool.</aside>
+    <p class="tiny muted">All on local feature branches of Eclipse Theia, admin of your own stack, top to bottom.</p>
+    <aside class="notes">The "I own the whole stack" flex. Because Theia is open source and these models run on my own GPUs, I don't file a ticket and wait, I open a branch and fix it. One real local branch per bullet: better_explain_fetch_failed surfaces WHY a local Ollama/endpoint call failed (connection refused, model not loaded, wrong port) instead of a bare "fetch failed." show_usage puts per-response token/usage stats in the chat, the practical use is spotting when a long response is approaching the request timeout so you can intervene. reset-loop adds a tool-call loop guard: on small local models a too-small context window makes the agent repeat the same tool call forever, and this stops that waste. local_ai + the Ollama schema fix make local models first-class, passing the full tool parameter schema through so they can actually use tools. Tie back to the thesis: you stay the director, and when the tool fights you, you also own the tool.</aside>
 </section>
 <section data-background-color="#1a2a1a">
     <h2>🪟 Context Size Is the Real Impediment</h2>
     <ul class="small">
-        <li>😵 Default local context is <strong>tiny</strong> — the agent runs out of room mid-task and starts flailing</li>
+        <li>😵 Default local context is <strong>tiny</strong>, the agent runs out of room mid-task and starts flailing</li>
         <li>🛠️ Fix it yourself: build a <strong>custom Ollama / LM Studio / vLLM model</strong> with a bigger <code>num_ctx</code></li>
         <li>✅ It <em>can</em> go big: <strong>Qwen3 8B handles 256k</strong> today</li>
-        <li>⚠️ But not everything does: <strong>Muse ships 8k</strong>, <strong>Gemma</strong> is modest too — know your model's ceiling</li>
+        <li>⚠️ But not everything does: <strong>Muse ships 8k</strong>, <strong>Gemma</strong> is modest too, know your model's ceiling</li>
         <li>📥 <strong>Input tokens matter</strong>: a fat system prompt eats the window before you've typed a thing</li>
     </ul>
     <div class="callout-green">
-        ✅ My fix: a custom agent called <strong><code>naked</code></strong> — <em>no</em> system prompt. Locally it just performs better. 🩲
+        ✅ My fix: a custom agent called <strong><code>naked</code></strong>, <em>no</em> system prompt. Locally it just performs better. 🩲
     </div>
     <p class="tiny muted">You own your GPU and your VRAM. This isn't a datacenter that costs more than your life savings. Tradeoffs exist, but the end result is pretty good. 💪</p>
     <aside class="notes">This is the honest "here's what actually bites you locally" slide, and it pairs with the earlier KV-cache slide. The number one practical impediment to local agentic coding is context size: Ollama and friends default to a small context window (often 2k to 8k), so the agent fills up fast and then thrashes, re-reading files, looping, losing the thread. The good news is you own the stack, so you fix it: author a custom model (an Ollama Modelfile with a larger num_ctx, or the equivalent in LM Studio / vLLM) to expose a bigger window. And models genuinely support it: as of today Qwen3 8B handles 256k context, which is enormous for a model that fits a cheap card. But be honest about the ceiling: not every model is generous. Meta's Muse ships with only 8k, and Gemma's windows are comparatively modest, so match the model to the job and don't assume 256k everywhere. The subtler lever is input tokens: every token you feed in (system prompt, tool schemas, file context) is context you spend before the model does any work, AND it costs latency and KV-cache memory. That's why I built a custom agent called "naked" with no system prompt at all: on local models, stripping the prompt consistently performs better, less to attend to, more room for the real task, faster first token. Input tokens matter as much as output tokens. Callback: this is the "stuffing the ceiling makes it dumber" point made actionable. End on the ownership note: tune the window as high as your VRAM allows and accept the tradeoff, because you own your GPU and your VRAM. You are not renting a datacenter that costs more than your life savings; the knobs are yours to turn, and even with the tradeoffs the end result is genuinely good. That's the whole empowerment thesis of the talk in one line.</aside>
@@ -813,7 +813,7 @@
         margin: 0;
     }
     .vibe-demo .prompt-card.big .prompt-text { font-size: 1.6em; font-weight: 700; }
-    /* Longer, full-sentence prompts (muse functional corrections) — small enough to read fully. */
+    /* Longer, full-sentence prompts (muse functional corrections), small enough to read fully. */
     .vibe-demo .prompt-card.med .prompt-text {
         font-size: 0.95em;
         font-weight: 600;
@@ -847,10 +847,10 @@
 <!-- QR code to the vibe-life repo -->
 <section class="vibe-qr center-slide" data-background-color="#0a1628">
     <h2>📱 Try It Yourself</h2>
-    <p class="lead">Scan to open the repo — every commit is a prompt.</p>
+    <p class="lead">Scan to open the repo, every commit is a prompt.</p>
     <img src="assets/vibe-life-qr.svg" alt="QR code for github.com/matthewkhouzam/vibe-life">
     <p class="repo-url">github.com/matthewkhouzam/vibe-life</p>
-    <aside class="notes">Point the audience at the repo before the live demos. The QR encodes https://github.com/matthewkhouzam/vibe-life/ — the same repo whose commits we are about to watch evolve.</aside>
+    <aside class="notes">Point the audience at the repo before the live demos. The QR encodes https://github.com/matthewkhouzam/vibe-life/, the same repo whose commits we are about to watch evolve.</aside>
 </section>
 
 <!-- Vibe Coding Demo section relocated to appear before Future Work -->
@@ -864,10 +864,10 @@
         <li>Watch the same simulation get "prettier" one prompt at a time</li>
     </ul>
     <div class="callout-blue">
-        ⏱️ All four versions were built <strong>locally</strong> with agentic coding — MTP + MLX on a Mac 4 Pro — taking <strong>26, 15, 24 and 41 minutes</strong> respectively.
+        ⏱️ All four versions were built <strong>locally</strong> with agentic coding, MTP + MLX on a Mac 4 Pro, taking <strong>26, 15, 24 and 41 minutes</strong> respectively.
     </div>
     <p class="tiny muted">Source: github.com/matthewkhouzam/vibe-life · videos recorded headlessly, 20s each</p>
-    <aside class="notes">This is the payoff demo. The point: with agentic coding you steer with intent ("make it pretty") and the tool does the plumbing. Show the progression: the first prompt is a full spec; the follow-ups are just vibes. Every version was produced by a LOCAL agent — Multi-Token Prediction (MTP) plus MLX on a Mac 4 Pro — with wall-clock agentic runtimes of 26 min (spec), 15 min ("pretty"), 24 min ("prettier"), and 41 min ("PRETTIER!"). Callback to the MTP slide: this is what made local agentic coding actually usable.</aside>
+    <aside class="notes">This is the payoff demo. The point: with agentic coding you steer with intent ("make it pretty") and the tool does the plumbing. Show the progression: the first prompt is a full spec; the follow-ups are just vibes. Every version was produced by a LOCAL agent, Multi-Token Prediction (MTP) plus MLX on a Mac 4 Pro, with wall-clock agentic runtimes of 26 min (spec), 15 min ("pretty"), 24 min ("prettier"), and 41 min ("PRETTIER!"). Callback to the MTP slide: this is what made local agentic coding actually usable.</aside>
 </section>
 
 <!-- Commit 1: the full spec prompt -->
@@ -903,7 +903,7 @@
         </div>
     </div>
     <p class="commit-tag">f2292e4 · +364 lines: full color palette, water blobs + shallow "foam", coastal sand beaches, colored HP bars &amp; styled HUD · 🕒 15 min agentic (MTP + MLX, Mac 4 Pro)</p>
-    <aside class="notes">Diff be766c0→f2292e4 (+364/-100). "Pretty" meant: a real palette (water/shallow/grass/sand/plant/herb/carn shades) with color-lerping, procedural terrain — water blobs, shallow "foam" cells bordering deep water, and coastal sand that looks like beach — plus colored HP bars and a proper dark UI bar. Went from flat blocks to a readable world.</aside>
+    <aside class="notes">Diff be766c0→f2292e4 (+364/-100). "Pretty" meant: a real palette (water/shallow/grass/sand/plant/herb/carn shades) with color-lerping, procedural terrain, water blobs, shallow "foam" cells bordering deep water, and coastal sand that looks like beach, plus colored HP bars and a proper dark UI bar. Went from flat blocks to a readable world.</aside>
 </section>
 
 <!-- Commit 3: make it prettier -->
@@ -921,7 +921,7 @@
         </div>
     </div>
     <p class="commit-tag">94a582a · +150 lines: desert biome (plants grow on grass only) + faded skull death sprites that fade out over time · 🕒 24 min agentic (MTP + MLX, Mac 4 Pro)</p>
-    <aside class="notes">Diff f2292e4→94a582a (+150/-7). "Prettier" added a desert biome — sandy blobs seeded on grass, where plants no longer grow — and animated death: cached skull sprites for herbivores/carnivores that fade out via decreasing alpha over several frames. More world variety plus a bit of storytelling in the visuals.</aside>
+    <aside class="notes">Diff f2292e4→94a582a (+150/-7). "Prettier" added a desert biome, sandy blobs seeded on grass, where plants no longer grow, and animated death: cached skull sprites for herbivores/carnivores that fade out via decreasing alpha over several frames. More world variety plus a bit of storytelling in the visuals.</aside>
 </section>
 
 <!-- Commit 4: MAKE IT PRETTIER! -->
@@ -939,32 +939,32 @@
         </div>
     </div>
     <p class="commit-tag">03adbb8 · rewrite (+181/-240): drop shadows, bounce animation, rounded bodies with outlines &amp; eyes, shimmering water · 🕒 41 min agentic (MTP + MLX, Mac 4 Pro)</p>
-    <aside class="notes">Diff 94a582a→03adbb8 (+181/-240) — a big refactor of the draw code. "PRETTIER!" brought character: entities cast ground drop-shadows and bounce (interpolated motion), bodies became rounded rects with outlines and little eyes, water shimmers via per-cell value noise, and HP bars got smoother. The most involved change of the four — 41 minutes — and visibly the lushest, most animated result.</aside>
+    <aside class="notes">Diff 94a582a→03adbb8 (+181/-240), a big refactor of the draw code. "PRETTIER!" brought character: entities cast ground drop-shadows and bounce (interpolated motion), bodies became rounded rects with outlines and little eyes, water shimmers via per-cell value noise, and HP bars got smoother. The most involved change of the four, 41 minutes, and visibly the lushest, most animated result.</aside>
 </section>
 
 <!-- Takeaway -->
 <section data-background-color="#1a2a1a">
     <h2>🧭 What Just Happened?</h2>
     <ul>
-        <li>🗒️ The <strong>first</strong> prompt was a real spec — design work</li>
+        <li>🗒️ The <strong>first</strong> prompt was a real spec, design work</li>
         <li>✨ Every prompt after was pure <strong>intent</strong>: "prettier"</li>
         <li>🤖 The agent handled the plumbing; you stayed the <strong>director</strong></li>
     </ul>
     <div class="callout-green">
         ✅ Steer with intent, review the diff, commit the prompt. That's the loop.
     </div>
-    <aside class="notes">Reinforce the thesis of the whole talk: AI is a generator you direct. Note that the commit history literally documents the prompts — reproducible, reviewable, versioned intent.</aside>
+    <aside class="notes">Reinforce the thesis of the whole talk: AI is a generator you direct. Note that the commit history literally documents the prompts, reproducible, reviewable, versioned intent.</aside>
 </section>
 
 <!-- ===================== muse-glimmer:30b variant ===================== -->
 <!-- Divider 1: different model, different kind of prompts -->
 <section data-background-color="#0a1628">
     <h2>🔁 Same Game, Different Model: <code>muse-glimmer:30b</code></h2>
-    <p class="lead">Same <strong>initial spec</strong> — then <strong>functional</strong> corrections, not cosmetic ones.</p>
+    <p class="lead">Same <strong>initial spec</strong>, then <strong>functional</strong> corrections, not cosmetic ones.</p>
     <ul class="small">
         <li>🧠 <strong>muse-glimmer:30b</strong> running with a <strong>128k context</strong> window</li>
         <li>🗒️ Commit 1 is the <em>same</em> "game of life" spec as before…</li>
-        <li>🛠️ …but the follow-ups fix <strong>behaviour</strong>: collisions, eating, hunger — not "make it prettier"</li>
+        <li>🛠️ …but the follow-ups fix <strong>behaviour</strong>: collisions, eating, hunger, not "make it prettier"</li>
     </ul>
     <p class="tiny muted">Source: github.com/matthewkhouzam/vibe-life · muse-life.py · videos recorded headlessly, 20s each</p>
     <aside class="notes">Contrast slide. The earlier demo used a model where the follow-up prompts were aesthetic ("make it pretty / prettier / PRETTIER!"). This run uses muse-glimmer:30b with a 128k context window, and the corrections are functional engineering fixes instead: add collision detection, make animals eat adjacent (not overlapping) animals, then fix collisions and hunger. Same opening spec, different kind of intent.</aside>
@@ -976,12 +976,12 @@
     <ul>
         <li>⏱️ <strong>Request timeouts</strong> on the long-context model</li>
         <li>🔁 The agent fell into <strong>endless loops</strong></li>
-        <li>🧩 Hard to keep on the rails — needed manual nudging between commits</li>
+        <li>🧩 Hard to keep on the rails, needed manual nudging between commits</li>
     </ul>
     <div class="callout-amber">
-        ℹ️ A big context window and a capable 30B model don't automatically mean a smooth agentic run — loop detection and timeout handling matter just as much.
+        ℹ️ A big context window and a capable 30B model don't automatically mean a smooth agentic run, loop detection and timeout handling matter just as much.
     </div>
-    <aside class="notes">The honesty beat. muse-glimmer:30b is powerful, but Theia had a hard time orchestrating it: we hit request timeouts and the agent would get stuck in endless loops, so each functional correction took manual intervention. The takeaway: raw model capability and context size aren't the whole story — the agentic harness (loop/timeout handling) is what makes it usable.</aside>
+    <aside class="notes">The honesty beat. muse-glimmer:30b is powerful, but Theia had a hard time orchestrating it: we hit request timeouts and the agent would get stuck in endless loops, so each functional correction took manual intervention. The takeaway: raw model capability and context size aren't the whole story, the agentic harness (loop/timeout handling) is what makes it usable.</aside>
 </section>
 
 <!-- muse commit 1: the spec -->
@@ -999,7 +999,7 @@
         </div>
     </div>
     <p class="commit-tag">4babdb9 · "initial muse life commit" · 🧠 muse-glimmer:30b · 128k ctx</p>
-    <aside class="notes">Same opening spec as the first demo, but produced by muse-glimmer:30b. A working ecosystem of plants, herbivores and carnivores — the baseline the next three prompts will correct.</aside>
+    <aside class="notes">Same opening spec as the first demo, but produced by muse-glimmer:30b. A working ecosystem of plants, herbivores and carnivores, the baseline the next three prompts will correct.</aside>
 </section>
 
 <!-- muse commit 2: collision detection -->
@@ -1035,7 +1035,7 @@
         </div>
     </div>
     <p class="commit-tag">0e75bcb · functional fix: eating triggers on adjacency (EAT_DIST), decoupled from overlap · 🧠 muse-glimmer:30b</p>
-    <aside class="notes">A precise behavioural correction: once collisions keep bodies apart, "eat on overlap" never fires — so eating is redefined to trigger when animals are adjacent (within EAT_DIST) rather than overlapping. The kind of bug you only see once the previous fix lands.</aside>
+    <aside class="notes">A precise behavioural correction: once collisions keep bodies apart, "eat on overlap" never fires, so eating is redefined to trigger when animals are adjacent (within EAT_DIST) rather than overlapping. The kind of bug you only see once the previous fix lands.</aside>
 </section>
 
 <!-- muse commit 4: fix collisions and hunger -->
@@ -1053,19 +1053,19 @@
         </div>
     </div>
     <p class="commit-tag">3341002 · functional fix: tuned collision resolution + hunger/health balance so the ecosystem is stable · 🧠 muse-glimmer:30b</p>
-    <aside class="notes">Final correction: balance the simulation — tune collision pushback and the hunger-drain / health-gain numbers so animals don't instantly starve or immortally survive. The ecosystem reaches a steady state. Four functional prompts vs. four aesthetic ones: same spec, different intent.</aside>
+    <aside class="notes">Final correction: balance the simulation, tune collision pushback and the hunger-drain / health-gain numbers so animals don't instantly starve or immortally survive. The ecosystem reaches a steady state. Four functional prompts vs. four aesthetic ones: same spec, different intent.</aside>
 </section>
 
 <!-- ===================== gemma4:12b (128k) variant ===================== -->
 <!-- Divider: third model, a one-shot richer spec -->
 <section data-background-color="#0a1628">
     <h2>🧬 Third Model: <code>gemma4:12b</code> · 128k ctx</h2>
-    <p class="lead">A <strong>richer, one-shot spec</strong> — terrain, water, and self-replication.</p>
+    <p class="lead">A <strong>richer, one-shot spec</strong>, terrain, water, and self-replication.</p>
     <ul class="small">
         <li>🧠 <strong>gemma4:12b</strong> with a <strong>128k context</strong> window</li>
         <li>🗺️ New rules: random <strong>terrain</strong>, carnivores <strong>can't cross water</strong>, HP regen/decay</li>
         <li>🧫 At <strong>HP == 100</strong> a lifeform <strong>splits into two</strong> at 50% HP</li>
-        <li>💬 The <strong>commit message is the prompt</strong> — verbatim, including the "write it to gemma-life.py" instruction</li>
+        <li>💬 The <strong>commit message is the prompt</strong>, verbatim, including the "write it to gemma-life.py" instruction</li>
     </ul>
     <p class="tiny muted">Source: github.com/matthewkhouzam/vibe-life · gemma-life.py · recorded headlessly, 20s</p>
     <aside class="notes">Third local model in the lineup. gemma4:12b with a 128k context window, driven by a single richer spec: a grid world with random terrain and water that carnivores cannot cross, constant plant HP regen, animal HP decay with gain-on-eat, and self-replication when HP hits 100 (split into two halves). The commit message literally is the prompt, right down to telling the model which file to write.</aside>
@@ -1086,7 +1086,53 @@
         </div>
     </div>
     <p class="commit-tag">b696a8d · one-shot: grid terrain + water, HP regen/decay, split-at-100 · 🧠 gemma4:12b · 128k ctx</p>
-    <aside class="notes">gemma4:12b took the richer spec in a single shot: a grid-based world with random terrain and blue water (which carnivores avoid), plants that regen HP, animals that lose HP over time and gain it by eating, and self-replication at full HP. A visibly different look — tile grid rather than free-moving circles — from the same family of rules.</aside>
+    <aside class="notes">gemma4:12b took the richer spec in a single shot: a grid-based world with random terrain and blue water (which carnivores avoid), plants that regen HP, animals that lose HP over time and gain it by eating, and self-replication at full HP. A visibly different look, tile grid rather than free-moving circles, from the same family of rules.</aside>
+</section>
+
+<!-- ===================== Claude Opus 5.0 (frontier cloud) variant ===================== -->
+<!-- Divider: the frontier comparison -->
+<section data-background-color="#0a1628">
+    <h2>☁️ Frontier Baseline: <code>Claude Opus 5.0</code></h2>
+    <p class="lead">Same spec, run on a <strong>frontier cloud</strong> model instead of a local one.</p>
+    <ul class="small">
+        <li>🏆 Arguably the <strong>best-looking</strong>, richest result of the four</li>
+        <li>🐢 …but it took <strong>~15 minutes</strong> of agentic time</li>
+        <li>💥 …and the game <strong>eventually crashes</strong> at runtime</li>
+    </ul>
+    <p class="tiny muted">Source: Claude Opus 5.0 · vibe-life.py · recorded headlessly, 20s (clip ends where it crashes)</p>
+    <aside class="notes">The counterpoint. We ran the same opening spec through Claude Opus 5.0, a frontier cloud model. The output is arguably the best of the bunch, but it cost ~15 minutes of agentic time and the resulting program eventually crashes, so the recorded clip simply ends when the game dies. The whole point of the next slide: better results don't automatically win if they're slower, pricier, and less reliable.</aside>
+</section>
+
+<!-- Opus demo: the one-shot spec -->
+<section class="vibe-demo" data-background-color="#0c1a2a">
+    <h2>1️⃣ The One-Shot Spec</h2>
+    <div class="twocol">
+        <div class="prompt-card spec">
+            <p class="prompt-label">Prompt · Claude Opus 5.0</p>
+            <p class="prompt-text">Make me a simulation game in pygame. It is a game of life with 3 types of entities: plants, herbivores and carnivores. A plant grows until eaten. Herbivores and carnivores start with high health; eating gains health, every turn loses health, at 0 HP they die. Carnivores gain HP by eating herbivores; herbivores gain HP by eating plants. Herbivores run away from carnivores; carnivores run toward herbivores to eat them.</p>
+        </div>
+        <div>
+            <video class="game-video" src="assets/opus-life-01.mp4"
+                   autoplay loop muted playsinline controls
+                   data-autoplay></video>
+        </div>
+    </div>
+    <p class="commit-tag">Claude Opus 5.0 · one-shot · 🕒 ~15 min agentic · 💥 crashes at runtime (clip ends on crash)</p>
+    <aside class="notes">Opus's result is polished and arguably the nicest of the four, but it took ~15 minutes and the program crashes, so the clip stops when the game dies. This is the proof point: Opus is better in some respects, yet qwen3.8 is "good enough" for the loop, locally, instantly, and for free. If Opus were faster and cheaper the trade-off would flip, but today, good-enough-and-local wins.</aside>
+</section>
+
+<!-- Takeaway: good enough wins -->
+<section data-background-color="#102a10">
+    <h2>⚖️ "Good Enough" Wins, For Now</h2>
+    <ul>
+        <li>🏆 <strong>Opus 5.0</strong>: arguably the best result…</li>
+        <li>🐢 …but <strong>~15 min</strong> and 💥 <strong>crashes</strong></li>
+        <li>⚡ <strong>Qwen3.8</strong>, local: fast, free, private, and <strong>good enough</strong></li>
+    </ul>
+    <div class="callout-green">
+        ✅ If frontier models were faster &amp; cheaper, the argument would flip. Today, local good-enough wins the loop.
+    </div>
+    <aside class="notes">The thesis in one slide. This isn't "local beats frontier", it's that the <em>economics</em> decide. Opus produces arguably better output, but at ~15 min per iteration and with a crash, the tight edit-review-commit loop favours a local model that's good enough and effectively free. The moment frontier latency and cost drop, re-run this comparison, the conclusion is a function of speed and price, not raw capability.</aside>
 </section>
 
 <section data-background-color="#1a0a2e">
