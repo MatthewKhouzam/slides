@@ -582,21 +582,12 @@
 <section data-background-color="#0a1628">
     <h2>⚙️ The Config (It's Tiny)</h2>
     <pre><code data-trim data-noescape class="language-json">
-{
-  "ai-features.modelSettings.providers": [
-    {
-      "name": "local-ollama",
-      "type": "openai-compatible",
-      "url": "http://localhost:11434/v1",
-      "models": ["qwen3:32b", "qwen3:8b"]
-    }
-  ],
-  "ai-features.codeCompletion.model": "qwen3:8b",
-  "ai-features.chat.model": "qwen3:32b"
-}
+"ai-features.ollama.ollamaModels": [
+    "gemma4:e2b"
+]
     </code></pre>
-    <p class="tiny muted">Small model for completion (fast), big model for chat (smart). Best of both. 🧠⚡</p>
-    <aside class="notes">Note the split: a snappy Qwen3 8B for inline completion, and the bigger Qwen3 32B for chat/agent where you can wait a beat - and it still fits a 24 GB card at Q4.</aside>
+    <p class="tiny muted">Just register the models you've pulled with Ollama - Theia discovers them automatically. 🧠⚡</p>
+    <aside class="notes">That's the whole config: list the Ollama models you've already pulled under ai-features.ollama.ollamaModels and Theia picks them up. Here it's gemma4:e2b - a tiny, fast model that's great for autocomplete and runs comfortably on modest VRAM. Add more entries to switch between completion and chat models.</aside>
 </section>
 <section data-background-color="#1a0a2e">
     <h2>Local MCP Servers are Key</h2>
