@@ -1,0 +1,10 @@
+[
+  {
+    "order": 1,
+    "commit": "b696a8dae752436c51151457dad311da449e2e3a",
+    "short": "b696a8d",
+    "subject": "using pygame, make me a game of life game. It has 3 layers. carnivores eat herbivores, herbivores eat plants, plants grow. Put it on a random terrain. The carnivores cannot cross water. Have each life form have hp. Plant hp regens contantly, animals goes down. the animals go up when they have food. When animal hp == 100, they split into two of 50% hp. write it to gemma-life.py:",
+    "video": "assets/gemma-life-01-b696a8d.mp4",
+    "ok": true
+  }
+]

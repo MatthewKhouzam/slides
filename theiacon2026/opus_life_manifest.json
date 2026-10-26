@@ -1,0 +1,12 @@
+[
+  {
+    "order": 1,
+    "model": "Claude Opus 5.0",
+    "subject": "one-shot spec (Claude Opus 5.0)",
+    "prompt": "Make me a simulation game in pygame. It is a game of life with 3 types of entities: plants, herbivores and carnivores. A plant grows until eaten. Herbivores and carnivores start with high health; eating gains health, every turn loses health, at 0 HP they die. Carnivores gain HP by eating herbivores; herbivores gain HP by eating plants. Herbivores run away from carnivores; carnivores run toward herbivores to eat them.",
+    "agentic_minutes": 15,
+    "crashes": true,
+    "video": "assets/opus-life-01.mp4",
+    "ok": true
+  }
+]

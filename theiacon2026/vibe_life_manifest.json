@@ -1,0 +1,38 @@
+[
+  {
+    "order": 1,
+    "commit": "be766c08ca85c8550327c3bf959430980af9a3fc",
+    "short": "be766c0",
+    "subject": "Initial commit.",
+    "prompt": "Make me a simulation game in pygame. it is a game of life. This game will play out with 3 types of entities. Plants, herbivores and carnivores. A plant will grow until eaten. A herbivore and carivore will start with high health, when it eats, it gains health. Every turn causes it to lose health. At 0 hp they die. Carnivores gain HP by eating herbivores. Herbivores gain HP by eating plants. Herbivores run away from carnivores. Carnivores run towards herbivores to eat them.",
+    "video": "assets/vibe-life-01-be766c0.mp4",
+    "ok": true
+  },
+  {
+    "order": 2,
+    "commit": "f2292e4b42589762935f71727ba45fe004105573",
+    "short": "f2292e4",
+    "subject": "prompt: \"Make it pretty\"",
+    "prompt": "Make it pretty",
+    "video": "assets/vibe-life-02-f2292e4.mp4",
+    "ok": true
+  },
+  {
+    "order": 3,
+    "commit": "94a582a9f4e5a01a661cfa0e42dbf064e25e4c75",
+    "short": "94a582a",
+    "subject": "prompt: \"Make it prettier\"",
+    "prompt": "Make it prettier",
+    "video": "assets/vibe-life-03-94a582a.mp4",
+    "ok": true
+  },
+  {
+    "order": 4,
+    "commit": "03adbb85136a22331901f4a3bc11493257893ac8",
+    "short": "03adbb8",
+    "subject": "prompt: \"MAKE IT PRETTIER!\"",
+    "prompt": "MAKE IT PRETTIER!",
+    "video": "assets/vibe-life-04-03adbb8.mp4",
+    "ok": true
+  }
+]

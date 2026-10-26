@@ -589,6 +589,42 @@
     <p class="tiny muted">Just register the models you've pulled with Ollama - Theia discovers them automatically. 🧠⚡</p>
     <aside class="notes">That's the whole config: list the Ollama models you've already pulled under ai-features.ollama.ollamaModels and Theia picks them up. Here it's gemma4:e2b - a tiny, fast model that's great for autocomplete and runs comfortably on modest VRAM. Add more entries to switch between completion and chat models.</aside>
 </section>
+<section>
+    <section class="center-slide" data-background-color="#0c1a2a">
+        <h2>⌨️ Start Here: Code Completion</h2>
+        <p class="lead">The free, low-stakes entry point to local AI 🆓</p>
+        <ul class="small">
+            <li>💻 Runs on a <strong>laptop</strong> or a <strong>small GPU</strong> - no datacenter required</li>
+            <li>⚡ Low latency, tiny model, fits in a few GB of VRAM</li>
+            <li>🔒 Zero egress - your half-typed function never leaves the machine</li>
+            <li>🎯 Lowest risk, highest daily payoff - it's just a smarter tab key</li>
+        </ul>
+        <div class="callout-green">
+            ✅ If you try one local feature, make it completion. It's the easiest win on modest hardware. 🧰
+        </div>
+        <aside class="notes">This is the "if you only do one thing" slide, and the honest on-ramp for people who don't own a beefy card. Inline code completion is the perfect first local feature: the model is small, latency is what matters (not raw smarts), and it runs comfortably on a laptop iGPU or a cheap few-GB GPU. It's also the lowest-risk use of AI - it only ever suggests the next line/block as you type, you accept or reject with a keypress, nothing runs, nothing touches your repo. Frame it as the free entry point: no monthly bill, no egress, works offline, and it's the feature where "good enough" local models genuinely feel instant. Everything agentic came earlier in the talk; this is the gentle, universally-accessible counterpoint.</aside>
+    </section>
+
+    <section data-background-color="#0a1628">
+        <h2>📦 Pick a Completion Model</h2>
+        <table class="small tight">
+            <thead>
+                <tr><th>Model</th><th>~VRAM (Q4)</th><th>Verdict for completion</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Gemma 3 / Qwen3 4B</strong></td><td>~3 GB</td><td>✅ Good enough - runs on a laptop</td></tr>
+                <tr><td><strong>Gemma 4 E4B / E2B</strong></td><td>~2-3 GB</td><td>🏆 Faster + sharper, built for this</td></tr>
+                <tr><td><strong>Qwen3 8B</strong></td><td>~6 GB</td><td>🏆 Best suggestions if you have the VRAM</td></tr>
+                <tr><td><strong>muse</strong></td><td>varies</td><td>🏆 Strong completions, coder-tuned</td></tr>
+            </tbody>
+        </table>
+        <div class="callout-blue">
+            ℹ️ <strong>Gemma 3</strong> or <strong>Qwen3</strong> are already good enough. <strong>Gemma 4</strong>, <strong>Qwen3 8B</strong> and <strong>muse</strong> just work better. 📈
+        </div>
+        <p class="tiny muted">Start small, see if the latency feels right, then size up only if your VRAM allows. 🧮</p>
+        <aside class="notes">The practical "which model" answer for completion specifically, and the honest message the whole slide exists to land: you do NOT need the newest or biggest model to get value. Gemma 3 or Qwen3 (the earlier/smaller picks) are already good enough for inline completion - perfectly usable on a laptop or a small GPU, which is the whole point of this being the free entry point. If you have a bit more headroom, the newer and larger options are a clear step up: Gemma 4 (the E4B/E2B variants are tiny, fast, and purpose-built for autocomplete), Qwen3 8B (noticeably better suggestions when it fits), and muse (coder-tuned, strong completions) all "work better" - sharper completions, better context awareness - but they're an upgrade, not a prerequisite. Advice: start with the smallest thing that runs, judge it on latency (completion lives or dies on how instant it feels), and only size up if your VRAM budget allows. Don't let "I don't have a 24GB card" stop anyone from trying completion today.</aside>
+    </section>
+</section>
 <section data-background-color="#1a0a2e">
     <h2>Local MCP Servers are Key</h2>
     <ul class='small'>

@@ -1,0 +1,34 @@
+[
+  {
+    "order": 1,
+    "commit": "4babdb9c3431cf75347a188f94b1e6a86f307f8c",
+    "short": "4babdb9",
+    "subject": "initial muse life commit",
+    "video": "assets/muse-life-01-4babdb9.mp4",
+    "ok": true
+  },
+  {
+    "order": 2,
+    "commit": "d273f47ce8e9bec7f91fc32301d555c563696d46",
+    "short": "d273f47",
+    "subject": "add collision detection",
+    "video": "assets/muse-life-02-d273f47.mp4",
+    "ok": true
+  },
+  {
+    "order": 3,
+    "commit": "0e75bcb502e82140e3c8b7221bddab435c056ce6",
+    "short": "0e75bcb",
+    "subject": "make animals eat adjacent animals, not overlapping",
+    "video": "assets/muse-life-03-0e75bcb.mp4",
+    "ok": true
+  },
+  {
+    "order": 4,
+    "commit": "33410028c63e76516917ce9c57320fde07285917",
+    "short": "3341002",
+    "subject": "fix collisions and hunger",
+    "video": "assets/muse-life-04-3341002.mp4",
+    "ok": true
+  }
+]
