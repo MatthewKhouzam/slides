@@ -676,34 +676,10 @@
         <li>📥 <strong>Input tokens matter</strong>: a fat system prompt eats the window before you've typed a thing</li>
     </ul>
     <div class="callout-green">
-        ✅ My fix: a custom agent called <strong><code>naked</code></strong>, <em>no</em> system prompt. Locally it just performs better. 🩲
+        ✅ Tune <code>num_ctx</code> to your VRAM and keep input lean. Locally, a bigger window beats a fancy prompt. 📏
     </div>
     <p class="tiny muted">You own your GPU and your VRAM. This isn't a datacenter that costs more than your life savings. Tradeoffs exist, but the end result is pretty good. 💪</p>
-    <aside class="notes">This is the honest "here's what actually bites you locally" slide, and it pairs with the earlier KV-cache slide. The number one practical impediment to local agentic coding is context size: Ollama and friends default to a small context window (often 2k to 8k), so the agent fills up fast and then thrashes, re-reading files, looping, losing the thread. The good news is you own the stack, so you fix it: author a custom model (an Ollama Modelfile with a larger num_ctx, or the equivalent in LM Studio / vLLM) to expose a bigger window. And models genuinely support it: as of today Qwen3 8B handles 256k context, which is enormous for a model that fits a cheap card. But be honest about the ceiling: not every model is generous. Meta's Muse ships with only 8k, and Gemma's windows are comparatively modest, so match the model to the job and don't assume 256k everywhere. The subtler lever is input tokens: every token you feed in (system prompt, tool schemas, file context) is context you spend before the model does any work, AND it costs latency and KV-cache memory. That's why I built a custom agent called "naked" with no system prompt at all: on local models, stripping the prompt consistently performs better, less to attend to, more room for the real task, faster first token. Input tokens matter as much as output tokens. Callback: this is the "stuffing the ceiling makes it dumber" point made actionable. End on the ownership note: tune the window as high as your VRAM allows and accept the tradeoff, because you own your GPU and your VRAM. You are not renting a datacenter that costs more than your life savings; the knobs are yours to turn, and even with the tradeoffs the end result is genuinely good. That's the whole empowerment thesis of the talk in one line.</aside>
-</section>
-<section data-background-color="#1a0a2e">
-    <h2>🩲 The <code>naked</code> Agent</h2>
-    <div class="twocol">
-        <div>
-            <ul class="small">
-                <li>🧵 A custom Theia agent with <strong>no system prompt</strong></li>
-                <li>📥 Every prompt token is spent <em>before</em> the model reasons</li>
-                <li>🎯 Small local models get <strong>distracted</strong> by a big prompt</li>
-                <li>⚡ Less to attend to = faster first token, more room for your code</li>
-                <li>📈 Only works <strong>now</strong>: modern LLMs are good enough to not need hand-holding</li>
-                <li>✅ Locally, it just <strong>performs better</strong></li>
-            </ul>
-        </div>
-        <div class="prompt-card spec" style="align-self:center;">
-            <p class="prompt-label">System prompt</p>
-            <p class="prompt-text" style="font-size:1.1em;">(empty)</p>
-        </div>
-    </div>
-    <div class="callout-green">
-        ✅ The leanest input wins. On a cloud frontier model a fat prompt is fine; on a 8B at home, every token counts.
-    </div>
-    <p class="tiny muted">Cloud models are trained to lean on elaborate system prompts. Local models often do better with none. 🧪</p>
-    <aside class="notes">Give the naked agent its own slide because it is a genuinely useful, counterintuitive local trick. Theia lets you define custom agents, including the prompt template. "naked" is one I made with an empty system prompt. The reasoning: input tokens are not free. A long system prompt (role, rules, tool etiquette, examples) is dozens to hundreds of tokens the model must read and attend to on every single turn before it even looks at your request. Big frontier cloud models were trained with those elaborate prompts and handle them well. Small local models (an 8B on your own card) are more easily distracted: the more boilerplate you stuff in front, the more they drift, hallucinate instructions, or burn context you needed for actual code. Stripping the prompt entirely consistently gives me better, faster, more on-task results locally, less to attend to, faster first token, and more of the precious context window left for the real work. It is the practical payoff of the "input tokens matter" point from the previous slide. Caveat honestly: this is empirical and model-dependent, not a universal law, so try it and measure. But it is a great example of the ownership thesis: because I own the agent definition and the model, I can experiment with something a cloud vendor would never let me toggle. Crucially, this is only viable now: a couple of model generations ago a bare prompt would have produced garbage, the models needed heavy instruction scaffolding to stay on task. Today's open-weights models are good enough to follow intent from the user turn alone, so the hand-holding system prompt has become optional, and often counterproductive, locally. It is a trick that the rising tide of model quality unlocked.</aside>
+    <aside class="notes">This is the honest "here's what actually bites you locally" slide, and it pairs with the earlier KV-cache slide. The number one practical impediment to local agentic coding is context size: Ollama and friends default to a small context window (often 2k to 8k), so the agent fills up fast and then thrashes, re-reading files, looping, losing the thread. The good news is you own the stack, so you fix it: author a custom model (an Ollama Modelfile with a larger num_ctx, or the equivalent in LM Studio / vLLM) to expose a bigger window. And models genuinely support it: as of today Qwen3 8B handles 256k context, which is enormous for a model that fits a cheap card. But be honest about the ceiling: not every model is generous. Meta's Muse ships with only 8k, and Gemma's windows are comparatively modest, so match the model to the job and don't assume 256k everywhere. The subtler lever is input tokens: every token you feed in (system prompt, tool schemas, file context) is context you spend before the model does any work, AND it costs latency and KV-cache memory. Callback: this is the "stuffing the ceiling makes it dumber" point made actionable. End on the ownership note: tune the window as high as your VRAM allows and accept the tradeoff, because you own your GPU and your VRAM. You are not renting a datacenter that costs more than your life savings; the knobs are yours to turn, and even with the tradeoffs the end result is genuinely good. That's the whole empowerment thesis of the talk in one line.</aside>
 </section>
 <section data-background-color="#0a1628">
     <h2>🛡️ Local Isn't Magic Either</h2>
@@ -800,14 +776,6 @@
         </tbody>
     </table>
     <aside class="notes">The honest takeaway: local nails completion and chat today. Big architectural reasoning still favors frontier cloud. Use the right tool per task - hybrid is fine.</aside>
-</section>
-<section class="center-slide" data-background-color="#2a1a1a">
-    <h2>🎬 Demo Time</h2>
-    <p class="lead">Unplug the network cable. Let's write some code. 🔌❌</p>
-    <div class="tenor-gif-embed" data-postid="12729522" data-share-method="host" data-aspect-ratio="1.0" data-height="400">
-        <a href="https://tenor.com/view/fingers-crossed-gif-12729522">Fingers Crossed</a>
-    </div>
-    <aside class="notes">Live demo. Suggested flow: (1) show Ollama running, (2) autocomplete with 3B, (3) chat refactor with 14B, (4) trace-server MCP root-cause query, (5) dramatically pull the network cable to prove it's all local.</aside>
 </section>
 <section data-background-color="#0c1a2a">
     <h2>🍿 Demo Checklist</h2>
