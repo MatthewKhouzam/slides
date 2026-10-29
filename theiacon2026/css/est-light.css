@@ -87,7 +87,7 @@ body, .reveal {
     z-index: 10;
 }
 .logo img {
-    width: 100px;
+    width: 180px;
     height: auto;
     /* Invert the white logo for light backgrounds */
     filter: brightness(0) saturate(100%) invert(29%) sepia(93%) saturate(1700%) hue-rotate(196deg) brightness(97%) contrast(104%);
